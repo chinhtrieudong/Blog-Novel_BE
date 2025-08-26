@@ -1,0 +1,1 @@
+ALTER TABLE comments MODIFY content LONGTEXT;
