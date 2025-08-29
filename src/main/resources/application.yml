@@ -41,3 +41,7 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
     tagsSorter: alpha
+
+jwt:
+  secret: "MgPq/ykL6LJj4bJLLvaIUkMAv7ig0OFTGA0Xcwo/aOc4AMUD1FeVc22EYoZuU4gYFF9AlOstLjaUHTwYqC7/Bw=="
+  expiration: 3600000 # 1 hour in milliseconds
