@@ -6,8 +6,8 @@ import com.blognovel.blognovel.dto.response.ApiResponse;
 import com.blognovel.blognovel.dto.response.AuthResponse;
 import com.blognovel.blognovel.dto.response.UserResponse;
 import com.blognovel.blognovel.jwt.JwtUtil;
+import com.blognovel.blognovel.service.AuthService;
 import com.blognovel.blognovel.service.CustomUserDetailsService;
-import com.blognovel.blognovel.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
@@ -29,7 +29,7 @@ public class AuthController {
         return ApiResponse.<UserResponse>builder()
                 .code(201)
                 .message("User registered successfully")
-                .data(userService.register(request))
+                .data(authService.register(request))
                 .build();
     }
 
@@ -38,7 +38,7 @@ public class AuthController {
         return ApiResponse.<UserResponse>builder()
                 .code(200)
                 .message("User retrieved successfully")
-                .data(userService.getUser(id))
+                .data(authService.getUser(id))
                 .build();
     }
 

@@ -11,33 +11,64 @@ import com.blognovel.blognovel.model.User;
 import com.blognovel.blognovel.repository.UserRepository;
 import com.blognovel.blognovel.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    public UserResponse register(UserRequest request) {
-        if (userRepository.existsByEmail(request.getEmail()) || userRepository.existsByUsername(request.getUsername())) {
-            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
-        }
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .status(Status.ACTIVE)
-                .build();
-        return userMapper.toResponse(userRepository.save(user));
+    @Override
+    public List<UserResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(userMapper::toResponse)
+                .toList();
     }
 
-    public UserResponse getUser(Long id) {
+    @Override
+    public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toResponse(user);
+    }
+
+    @Override
+    public UserResponse updateUser(Long id, UserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        user.setUsername(request.getUsername() != null ? request.getUsername() : user.getUsername());
+        user.setEmail(request.getEmail() != null ? request.getEmail() : user.getEmail());
+        user.setRole(request.getRole() != null ? Role.valueOf(request.getRole()) : user.getRole());
+
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserResponse changeUserStatus(Long id, String status) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        user.setStatus(Status.valueOf(status));
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponse changeUserRole(Long id, String role) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        user.setRole(Role.valueOf(role));
+        return userMapper.toResponse(userRepository.save(user));
     }
 }
