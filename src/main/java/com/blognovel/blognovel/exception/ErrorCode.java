@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
     USER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "User already exists"),
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found");
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
+    INVALID_STATUS(HttpStatus.BAD_REQUEST, "Invalid status"),
+    INVALID_ROLE(HttpStatus.BAD_REQUEST, "Invalid role"),;
 
     private final HttpStatus status;
     private final String message;

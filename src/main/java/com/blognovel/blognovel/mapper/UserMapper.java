@@ -9,9 +9,11 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
+    @Mapping(source = "role", target = "role")
+    @Mapping(source = "status", target = "status")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     UserResponse toResponse(User user);
 
     User toEntity(UserRequest request);
 }
-

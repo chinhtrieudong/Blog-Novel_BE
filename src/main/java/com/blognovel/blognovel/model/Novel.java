@@ -34,6 +34,7 @@ public class Novel extends BaseEntity {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private NovelStatus status = NovelStatus.ONGOING;
 

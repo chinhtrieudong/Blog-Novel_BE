@@ -35,6 +35,7 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private PostStatus status = PostStatus.DRAFT;
 

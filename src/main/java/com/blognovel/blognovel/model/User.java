@@ -35,9 +35,11 @@ public class User extends BaseEntity {
 
     private String avatarUrl;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private Status status = Status.ACTIVE;
 

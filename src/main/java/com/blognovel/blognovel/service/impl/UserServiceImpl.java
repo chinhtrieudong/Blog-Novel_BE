@@ -43,7 +43,9 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         user.setUsername(request.getUsername() != null ? request.getUsername() : user.getUsername());
         user.setEmail(request.getEmail() != null ? request.getEmail() : user.getEmail());
-        user.setRole(request.getRole() != null ? Role.valueOf(request.getRole()) : user.getRole());
+        user.setFullName(request.getFullName() != null ? request.getFullName() : user.getFullName());
+        user.setBio(request.getBio() != null ? request.getBio() : user.getBio());
+        user.setAvatarUrl(request.getAvatarUrl() != null ? request.getAvatarUrl() : user.getAvatarUrl());
 
         return userMapper.toResponse(userRepository.save(user));
     }
@@ -60,7 +62,11 @@ public class UserServiceImpl implements UserService {
     public UserResponse changeUserStatus(Long id, String status) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        user.setStatus(Status.valueOf(status));
+        try {
+            user.setStatus(Status.valueOf(status.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.INVALID_STATUS);
+        }
         return userMapper.toResponse(userRepository.save(user));
     }
 
@@ -68,7 +74,11 @@ public class UserServiceImpl implements UserService {
     public UserResponse changeUserRole(Long id, String role) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        user.setRole(Role.valueOf(role));
+        try {
+            user.setRole(Role.valueOf(role.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.INVALID_ROLE);
+        }
         return userMapper.toResponse(userRepository.save(user));
     }
 }

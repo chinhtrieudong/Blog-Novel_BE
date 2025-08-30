@@ -1,5 +1,6 @@
 package com.blognovel.blognovel.service.impl;
 
+import com.blognovel.blognovel.dto.request.AuthRequest;
 import com.blognovel.blognovel.dto.request.UserRequest;
 import com.blognovel.blognovel.dto.response.UserResponse;
 import com.blognovel.blognovel.enums.Role;
@@ -21,7 +22,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    public UserResponse register(UserRequest request) {
+    public UserResponse register(AuthRequest request) {
         if (userRepository.existsByEmail(request.getEmail()) || userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
         }
@@ -33,11 +34,5 @@ public class AuthServiceImpl implements AuthService {
                 .status(Status.ACTIVE)
                 .build();
         return userMapper.toResponse(userRepository.save(user));
-    }
-
-    public UserResponse getUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        return userMapper.toResponse(user);
     }
 }

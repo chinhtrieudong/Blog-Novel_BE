@@ -25,20 +25,11 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ApiResponse<UserResponse> register(@RequestBody UserRequest request) {
+    public ApiResponse<UserResponse> register(@RequestBody AuthRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .code(201)
                 .message("User registered successfully")
                 .data(authService.register(request))
-                .build();
-    }
-
-    @GetMapping("/me/{id}")
-    public ApiResponse<UserResponse> getUser(@PathVariable Long id) {
-        return ApiResponse.<UserResponse>builder()
-                .code(200)
-                .message("User retrieved successfully")
-                .data(authService.getUser(id))
                 .build();
     }
 
