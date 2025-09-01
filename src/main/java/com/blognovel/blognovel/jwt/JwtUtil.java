@@ -18,14 +18,14 @@ public class JwtUtil {
 
     public JwtUtil(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration}") long expiration
-    ) {
+            @Value("${jwt.expiration}") long expiration) {
         this.key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
         this.expiration = expiration;
     }
-    public String generateToken(UserDetails userDetails) {
+
+    public String generateToken(String username) {
         return Jwts.builder()
-                .subject(userDetails.getUsername())
+                .subject(username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
@@ -47,7 +47,7 @@ public class JwtUtil {
     }
 
     private boolean isTokenExpired(String token) {
-         Date expirationDate = Jwts.parser()
+        Date expirationDate = Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
@@ -55,5 +55,41 @@ public class JwtUtil {
                 .getExpiration();
         return expirationDate.before(new Date());
     }
-}
 
+    public Date getExpirationDate(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+    }
+
+    public long getExpirationMillis(String token) {
+        Date exp = getExpirationDate(token);
+        return exp.getTime() - System.currentTimeMillis();
+    }
+
+    // refresh token
+    public String generateRefreshToken(String username) {
+        long refreshExpiration = expiration * 12;
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
+                .signWith(key)
+                .compact();
+    }
+
+    public boolean validateRefreshToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}

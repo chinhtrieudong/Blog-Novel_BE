@@ -1,4 +1,4 @@
-package com.blognovel.blognovel.service;
+package com.blognovel.blognovel.service.util;
 
 import com.blognovel.blognovel.exception.AppException;
 import com.blognovel.blognovel.exception.ErrorCode;
