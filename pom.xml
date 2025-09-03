@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
+		<!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.blognovel</groupId>
 	<artifactId>blognovel-service</artifactId>
@@ -67,12 +68,13 @@
 		<!-- Flyway -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-mysql</artifactId>
+			<artifactId>flyway-core</artifactId>
+			<version>11.7.2</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
+			<artifactId>flyway-mysql</artifactId>
+			<version>11.7.2</version>
 		</dependency>
 
 		<dependency>
@@ -99,7 +101,7 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.5.0</version>
+			<version>${springdoc.version}</version>
 		</dependency>
 
 		<dependency>
@@ -154,7 +156,7 @@
 			<scope>test</scope>
 		</dependency>
 
-        <!--	redis	-->
+		<!--	redis	-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
@@ -165,7 +167,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version> <!-- thêm version cho chắc chắn -->
+				<version>3.11.0</version>				<!-- thêm version cho chắc chắn -->
 				<configuration>
 					<annotationProcessorPaths>
 						<path>
@@ -194,6 +196,21 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>11.7.2</version>				<!-- phiên bản mới nhất -->
+				<configuration>
+					<url>jdbc:mysql://localhost:3306/blog_novel_db</url>
+					<user>root</user>
+					<password>root</password>
+					<schemas>
+						<schema>blog_novel_db</schema>
+					</schemas>
+					<cleanDisabled>false</cleanDisabled>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 

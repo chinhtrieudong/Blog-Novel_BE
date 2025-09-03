@@ -4,6 +4,7 @@ import com.blognovel.blognovel.dto.request.AuthRequest;
 import com.blognovel.blognovel.dto.request.ForgotPasswordRequest;
 import com.blognovel.blognovel.dto.request.RefreshTokenRequest;
 import com.blognovel.blognovel.dto.request.ResetPasswordRequest;
+import com.blognovel.blognovel.dto.request.UserRequest;
 import com.blognovel.blognovel.dto.response.ApiResponse;
 import com.blognovel.blognovel.dto.response.AuthResponse;
 import com.blognovel.blognovel.dto.response.TokenResponse;
@@ -77,24 +78,14 @@ public class AuthController {
                 .build();
     }
 
-    @PostMapping("/refresh-token")
-    public ApiResponse<TokenResponse> refreshToken(@RequestBody @Valid RefreshTokenRequest request) {
-        String username = jwtUtil.extractUsername(request.getRefreshToken());
-        String storedToken = refreshTokenService.getRefreshToken(username);
-
-        if (storedToken == null || !storedToken.equals(request.getRefreshToken())) {
-            throw new RuntimeException("Invalid refresh token");
-        }
-
-        String newAccessToken = jwtUtil.generateToken(username);
-        String newRefreshToken = jwtUtil.generateRefreshToken(username);
-
-        refreshTokenService.saveRefreshToken(username, newRefreshToken, 7);
-
-        return ApiResponse.<TokenResponse>builder()
+    @PutMapping("/profile")
+    public ApiResponse<UserResponse> updateProfile(@RequestBody @Valid UserRequest request,
+            Authentication authentication) {
+        String username = authentication.getName();
+        return ApiResponse.<UserResponse>builder()
                 .code(200)
-                .message("Token refreshed successfully")
-                .data(new TokenResponse(newAccessToken, newRefreshToken))
+                .message("User profile updated successfully")
+                .data(authService.updateProfile(username, request))
                 .build();
     }
 
@@ -115,6 +106,27 @@ public class AuthController {
                 .code(200)
                 .message("Password reset successfully.")
                 .data("You can now login with your new password.")
+                .build();
+    }
+
+    @PostMapping("/refresh-token")
+    public ApiResponse<TokenResponse> refreshToken(@RequestBody @Valid RefreshTokenRequest request) {
+        String username = jwtUtil.extractUsername(request.getRefreshToken());
+        String storedToken = refreshTokenService.getRefreshToken(username);
+
+        if (storedToken == null || !storedToken.equals(request.getRefreshToken())) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        String newAccessToken = jwtUtil.generateToken(username);
+        String newRefreshToken = jwtUtil.generateRefreshToken(username);
+
+        refreshTokenService.saveRefreshToken(username, newRefreshToken, 7);
+
+        return ApiResponse.<TokenResponse>builder()
+                .code(200)
+                .message("Token refreshed successfully")
+                .data(new TokenResponse(newAccessToken, newRefreshToken))
                 .build();
     }
 }

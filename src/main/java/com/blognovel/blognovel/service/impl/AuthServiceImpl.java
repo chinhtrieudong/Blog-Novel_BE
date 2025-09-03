@@ -3,6 +3,7 @@ package com.blognovel.blognovel.service.impl;
 import com.blognovel.blognovel.dto.request.AuthRequest;
 import com.blognovel.blognovel.dto.request.ForgotPasswordRequest;
 import com.blognovel.blognovel.dto.request.ResetPasswordRequest;
+import com.blognovel.blognovel.dto.request.UserRequest;
 import com.blognovel.blognovel.dto.response.TokenResponse;
 import com.blognovel.blognovel.dto.response.UserResponse;
 import com.blognovel.blognovel.enums.Role;
@@ -17,7 +18,6 @@ import com.blognovel.blognovel.service.AuthService;
 import com.blognovel.blognovel.service.util.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
@@ -31,7 +31,6 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService blacklistService;
-    private final UserDetailsService userDetailsService;
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String RESET_PREFIX = "reset:";
 
@@ -102,5 +101,18 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
         redisTemplate.delete(RESET_PREFIX + request.getToken());
+    }
+
+    @Override
+    public UserResponse updateProfile(String username, UserRequest request) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        user.setUsername(request.getUsername() != null ? request.getUsername() : user.getUsername());
+        user.setEmail(request.getEmail() != null ? request.getEmail() : user.getEmail());
+        user.setFullName(request.getFullName() != null ? request.getFullName() : user.getFullName());
+        user.setBio(request.getBio() != null ? request.getBio() : user.getBio());
+        user.setAvatarUrl(request.getAvatarUrl() != null ? request.getAvatarUrl() : user.getAvatarUrl());
+
+        return userMapper.toResponse(userRepository.save(user));
     }
 }
