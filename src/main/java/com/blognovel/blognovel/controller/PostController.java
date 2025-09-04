@@ -3,8 +3,6 @@ package com.blognovel.blognovel.controller;
 import com.blognovel.blognovel.dto.request.PostRequest;
 import com.blognovel.blognovel.dto.response.PagedResponse;
 import com.blognovel.blognovel.dto.response.PostResponse;
-import com.blognovel.blognovel.dto.response.CategoryResponse;
-import com.blognovel.blognovel.dto.response.TagResponse;
 import com.blognovel.blognovel.exception.AppException;
 import com.blognovel.blognovel.exception.ErrorCode;
 import com.blognovel.blognovel.model.User;
@@ -18,15 +16,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
 public class PostController {
 
-    private PostService postService;
-    private UserRepository userRepository;
+    private final PostService postService;
+    private final UserRepository userRepository;
 
     @GetMapping
     public PagedResponse<PostResponse> getAllPosts(
@@ -37,15 +34,13 @@ public class PostController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Principal principal) {
-        Long currentUserId = principal != null ? getCurrentUserId(principal) : null;
         Pageable pageable = PageRequest.of(page, size);
-        return postService.getAllPosts(title, categoryId, tagId, status, pageable, currentUserId);
+        return postService.getAllPosts(title, categoryId, tagId, status, pageable);
     }
 
     @GetMapping("/{id}")
     public PostResponse getPostById(@PathVariable Long id, Principal principal) {
-        Long currentUserId = principal != null ? getCurrentUserId(principal) : null;
-        return postService.getPostById(id, currentUserId);
+        return postService.getPostById(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -65,22 +60,6 @@ public class PostController {
     @DeleteMapping("/{id}")
     public void deletePost(@PathVariable Long id) {
         postService.deletePost(id);
-    }
-
-    @PostMapping("/{id}/like")
-    public boolean likeOrUnlikePost(@PathVariable Long id, Principal principal) {
-        Long userId = getCurrentUserId(principal);
-        return postService.likeOrUnlikePost(id, userId);
-    }
-
-    @GetMapping("/categories")
-    public List<CategoryResponse> getAllCategories() {
-        return postService.getAllCategories();
-    }
-
-    @GetMapping("/tags")
-    public List<TagResponse> getAllTags() {
-        return postService.getAllTags();
     }
 
     @PostMapping("/{id}/views")

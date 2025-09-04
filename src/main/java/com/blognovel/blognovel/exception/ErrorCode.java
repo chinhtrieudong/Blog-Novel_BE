@@ -9,7 +9,11 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
     INVALID_STATUS(HttpStatus.BAD_REQUEST, "Invalid status"),
     INVALID_ROLE(HttpStatus.BAD_REQUEST, "Invalid role"),
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),;
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "Post not found"),
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "Category not found"),
+    TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "Tag not found"),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Comment not found"),;
 
     private final HttpStatus status;
     private final String message;
