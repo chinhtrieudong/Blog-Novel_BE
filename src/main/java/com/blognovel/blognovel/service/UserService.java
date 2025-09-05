@@ -19,4 +19,6 @@ public interface UserService {
     UserResponse changeUserStatus(Long id, String status);
 
     UserResponse changeUserRole(Long id, String role);
+
+    UserResponse getCurrentUser(String username);
 }

@@ -81,4 +81,11 @@ public class UserServiceImpl implements UserService {
         }
         return userMapper.toResponse(userRepository.save(user));
     }
+
+    @Override
+    public UserResponse getCurrentUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return userMapper.toResponse(user);
+    }
 }
