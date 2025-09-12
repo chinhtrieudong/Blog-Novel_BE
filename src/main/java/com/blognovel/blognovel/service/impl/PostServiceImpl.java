@@ -13,6 +13,7 @@ import com.blognovel.blognovel.repository.PostRepository;
 import com.blognovel.blognovel.repository.CategoryRepository;
 import com.blognovel.blognovel.repository.TagRepository;
 import com.blognovel.blognovel.repository.UserRepository;
+import com.blognovel.blognovel.service.CloudinaryService;
 import com.blognovel.blognovel.service.PostService;
 
 import com.blognovel.blognovel.service.util.SlugGenerator;
@@ -24,6 +25,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +43,7 @@ public class PostServiceImpl implements PostService {
         private final TagRepository tagRepository;
         private final UserRepository userRepository;
         private final PostMapper postMapper;
+        private final CloudinaryService cloudinaryService;
 
         @Override
         public PagedResponse<PostResponse> getAllPosts(String title, Long categoryId, Long tagId, String status,
@@ -118,6 +122,15 @@ public class PostServiceImpl implements PostService {
                 String slug = SlugGenerator.makeSlug(request.getTitle());
                 post.setSlug(slug);
 
+                if (request.getCoverImage() != null && !request.getCoverImage().isEmpty()) {
+                        try {
+                                String imageUrl = cloudinaryService.uploadImage(request.getCoverImage());
+                                post.setCoverImage(imageUrl);
+                        } catch (IOException e) {
+                                throw new AppException(ErrorCode.UPLOAD_FAILED);
+                        }
+                }
+
                 Post savedPost = postRepository.save(post);
                 return postMapper.toResponse(savedPost);
         }
@@ -146,6 +159,16 @@ public class PostServiceImpl implements PostService {
 
                 String slug = SlugGenerator.makeSlug(request.getTitle());
                 post.setSlug(slug);
+
+                if (request.getCoverImage() != null && !request.getCoverImage().isEmpty()) {
+                        try {
+                                String imageUrl = cloudinaryService.uploadImage(request.getCoverImage());
+                                post.setCoverImage(imageUrl);
+                        } catch (IOException e) {
+                                throw new AppException(ErrorCode.UPLOAD_FAILED);
+                        }
+                }
+
 
                 Post updatedPost = postRepository.save(post);
                 return postMapper.toResponse(updatedPost);

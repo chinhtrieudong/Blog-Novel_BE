@@ -10,6 +10,7 @@ import com.blognovel.blognovel.model.Novel;
 import com.blognovel.blognovel.model.User;
 import com.blognovel.blognovel.repository.NovelRepository;
 import com.blognovel.blognovel.repository.UserRepository;
+import com.blognovel.blognovel.service.CloudinaryService;
 import com.blognovel.blognovel.service.NovelService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +33,7 @@ public class NovelServiceImpl implements NovelService {
     private final NovelRepository novelRepository;
     private final UserRepository userRepository;
     private final NovelMapper novelMapper;
+    private final CloudinaryService cloudinaryService;
 
     @Override
     public PagedResponse<NovelResponse> getAllNovels(String title, Long genreId, String author, Pageable pageable) {
@@ -74,7 +77,19 @@ public class NovelServiceImpl implements NovelService {
     public NovelResponse createNovel(NovelRequest novelRequest, Long currentUserId) {
          User user = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
         Novel novel = novelMapper.toEntity(novelRequest);
+
+        novel.setAuthor(user);
+        if (novelRequest.getCoverImage() != null && !novelRequest.getCoverImage().isEmpty()) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(novelRequest.getCoverImage());
+                novel.setCoverImage(imageUrl);
+            } catch (IOException e) {
+                throw new AppException(ErrorCode.UPLOAD_FAILED);
+            }
+        }
+
         Novel savedNovel = novelRepository.save(novel);
         return novelMapper.toResponse(savedNovel);
     }
@@ -85,6 +100,15 @@ public class NovelServiceImpl implements NovelService {
                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
 
         novelMapper.updateNovelFromDto(novelRequest, novel);
+
+        if (novelRequest.getCoverImage() != null && !novelRequest.getCoverImage().isEmpty()) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(novelRequest.getCoverImage());
+                novel.setCoverImage(imageUrl);
+            } catch (IOException e) {
+                throw new AppException(ErrorCode.UPLOAD_FAILED);
+            }
+        }
 
         Novel updatedNovel = novelRepository.save(novel);
         return novelMapper.toResponse(updatedNovel);

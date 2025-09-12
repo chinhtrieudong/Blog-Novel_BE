@@ -14,7 +14,8 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "Category not found"),
     TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "Tag not found"),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Comment not found"),
-    NOVEL_NOT_FOUND(HttpStatus.NOT_FOUND, "Novel not found"),;
+    NOVEL_NOT_FOUND(HttpStatus.NOT_FOUND, "Novel not found"),
+    UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Image upload failed"),;
 
     private final HttpStatus status;
     private final String message;
