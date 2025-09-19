@@ -9,6 +9,9 @@ import com.blognovel.blognovel.exception.ErrorCode;
 import com.blognovel.blognovel.model.User;
 import com.blognovel.blognovel.repository.UserRepository;
 import com.blognovel.blognovel.service.PostService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,20 +23,21 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
+@Tag(name = "Posts", description = "Endpoints for managing blog posts")
 public class PostController {
 
     private final PostService postService;
     private final UserRepository userRepository;
 
     @GetMapping
+    @Operation(summary = "Get all posts", description = "Retrieves a paginated list of posts, with optional filtering.")
     public ApiResponse<PagedResponse<PostResponse>> getAllPosts(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long tagId,
-            @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
+            @Parameter(description = "Filter by post title") @RequestParam(required = false) String title,
+            @Parameter(description = "Filter by category ID") @RequestParam(required = false) Long categoryId,
+            @Parameter(description = "Filter by tag ID") @RequestParam(required = false) Long tagId,
+            @Parameter(description = "Filter by post status") @RequestParam(required = false) String status,
+            @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         PagedResponse<PostResponse> posts = postService.getAllPosts(title, categoryId, tagId, status, pageable);
         return ApiResponse.<PagedResponse<PostResponse>>builder()
@@ -44,7 +48,8 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<PostResponse> getPostById(@PathVariable Long id) {
+    @Operation(summary = "Get post by ID", description = "Retrieves a specific post by its unique identifier.")
+    public ApiResponse<PostResponse> getPostById(@Parameter(description = "Post ID") @PathVariable Long id) {
         PostResponse post = postService.getPostById(id);
         return ApiResponse.<PostResponse>builder()
                 .code(200)
@@ -55,7 +60,10 @@ public class PostController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ApiResponse<PostResponse> createPost(@RequestBody PostRequest request, Principal principal) {
+    @Operation(summary = "Create a new post (Admin only)", description = "Creates a new blog post. Requires ADMIN role.")
+    public ApiResponse<PostResponse> createPost(
+            @RequestBody PostRequest request,
+            @Parameter(hidden = true) Principal principal) { // Hide Principal
         Long authorId = getCurrentUserId(principal);
         PostResponse createdPost = postService.createPost(request, authorId);
         return ApiResponse.<PostResponse>builder()
@@ -67,7 +75,10 @@ public class PostController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ApiResponse<PostResponse> updatePost(@PathVariable Long id, @RequestBody PostRequest request) {
+    @Operation(summary = "Update post (Admin only)", description = "Updates an existing blog post. Requires ADMIN role.")
+    public ApiResponse<PostResponse> updatePost(
+            @Parameter(description = "Post ID") @PathVariable Long id,
+            @RequestBody PostRequest request) {
         PostResponse updatedPost = postService.updatePost(id, request);
         return ApiResponse.<PostResponse>builder()
                 .code(200)
@@ -78,7 +89,8 @@ public class PostController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deletePost(@PathVariable Long id) {
+    @Operation(summary = "Delete post (Admin only)", description = "Deletes a blog post. Requires ADMIN role.")
+    public ApiResponse<Void> deletePost(@Parameter(description = "Post ID") @PathVariable Long id) {
         postService.deletePost(id);
         return ApiResponse.<Void>builder()
                 .code(200)
@@ -87,7 +99,8 @@ public class PostController {
     }
 
     @PostMapping("/{id}/views")
-    public ApiResponse<Void> incrementViewCount(@PathVariable Long id) {
+    @Operation(summary = "Increment view count", description = "Increments the view count for a specific post.")
+    public ApiResponse<Void> incrementViewCount(@Parameter(description = "Post ID") @PathVariable Long id) {
         postService.incrementViewCount(id);
         return ApiResponse.<Void>builder()
                 .code(200)

@@ -6,17 +6,20 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/uploads")
 @RequiredArgsConstructor
+@Tag(name = "File Uploads", description = "Endpoints for uploading and deleting files")
 public class FileUploadController {
 
     private final CloudinaryService cloudinaryService;
@@ -27,12 +30,9 @@ public class FileUploadController {
     )
     @Operation(summary = "Upload novel cover image", description = "Uploads a cover image for a novel to Cloudinary")
     public ResponseEntity<ApiResponse<String>> uploadNovelCoverImage(
-            @Parameter(
-                    description = "File to upload",
-                    required = true,
+            @Parameter(description = "File to upload", required = true,
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(type = "string", format = "binary"))
-            )
+                            schema = @Schema(type = "string", format = "binary")))
             @RequestPart("image") MultipartFile image
     ) {
         try {
@@ -53,7 +53,8 @@ public class FileUploadController {
     }
 
     @DeleteMapping("/novels/cover-image")
-    public ApiResponse<String> deleteNovelCoverImage(@RequestParam("publicId") String publicId) {
+    @Operation(summary = "Delete novel cover image", description = "Deletes a novel cover image from Cloudinary")
+    public ApiResponse<String> deleteNovelCoverImage(@Parameter(description = "Public ID of the image to delete", required = true) @RequestParam("publicId") String publicId) {
         try {
             String result = cloudinaryService.deleteImage(publicId);
             return ApiResponse.<String>builder()
