@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: blog_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: blog_novel_db
+      MYSQL_USER: bloguser
+      MYSQL_PASSWORD: blogpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: blog_app
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      MYSQLHOST: mysql
+      MYSQLPORT: 3306
+      MYSQLDATABASE: blog_novel_db
+      MYSQLUSER: bloguser
+      MYSQLPASSWORD: blogpass
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:
