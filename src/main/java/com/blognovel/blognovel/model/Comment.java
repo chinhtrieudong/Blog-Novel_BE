@@ -39,4 +39,6 @@ public class Comment extends BaseEntity {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Comment> replies;
+
+    private Long likeCount = 0L;
 }
