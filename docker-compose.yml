@@ -14,13 +14,34 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  redis:
+    image: redis:7.0
+    container_name: blog_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   app:
     build: .
     container_name: blog_app
     restart: always
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
       MYSQLHOST: mysql
@@ -28,8 +49,12 @@ services:
       MYSQLDATABASE: blog_novel_db
       MYSQLUSER: bloguser
       MYSQLPASSWORD: blogpass
+      REDISHOST: redis
+      REDISPORT: 6379
+      CLOUDINARY_URL: cloudinary://dummy:dummy@dummy
     ports:
       - "8080:8080"
 
 volumes:
   mysql_data:
+  redis_data:

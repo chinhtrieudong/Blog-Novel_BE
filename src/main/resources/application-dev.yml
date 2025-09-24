@@ -6,9 +6,9 @@ spring:
     name: blog-novel-backend
 
   datasource:
-    url: jdbc:mysql://localhost:3306/blog_novel_db
-    username: root
-    password: root
+    url: jdbc:mysql://${MYSQLHOST:mysql}:${MYSQLPORT:3306}/${MYSQLDATABASE:blog_novel_db}
+    username: ${MYSQLUSER:root}
+    password: ${MYSQLPASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -27,8 +27,8 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDISHOST:localhost}
+      port: ${REDISPORT:6379}
 
 logging:
   level:
