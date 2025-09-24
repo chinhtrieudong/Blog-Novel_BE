@@ -6,9 +6,9 @@ spring:
     name: blog-novel-backend
 
   datasource:
-    url: jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}?useSSL=false&serverTimezone=UTC
-    username: ${MYSQLUSER}
-    password: ${MYSQLPASSWORD}
+    url: jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:blog_novel_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQLUSER:bloguser}
+    password: ${MYSQLPASSWORD:blogpass}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -24,13 +24,13 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
-    url: jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}?useSSL=false&serverTimezone=UTC
-    user: ${MYSQLUSER}
-    password: ${MYSQLPASSWORD}
+    url: jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:blog_novel_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    user: ${MYSQLUSER:bloguser}
+    password: ${MYSQLPASSWORD:blogpass}
 
   data:
     redis:
-      url: ${REDIS_URL}
+      url: ${REDIS_URL:redis://localhost:6379}
 
 logging:
   level:
@@ -45,5 +45,5 @@ springdoc:
     path: /swagger-ui.html
 
 jwt:
-  secret: ${JWT_SECRET:default-secret}
+  secret: ${JWT_SECRET:dGhpc2lzYXZlcnlsb25nc2VjcmV0a2V5Zm9yand0dGhpc2}
   expiration: 3600000
