@@ -30,4 +30,9 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
         void incrementViewCount(@Param("postId") Long postId);
 
         long countByStatus(PostStatus status);
+
+        @Query("SELECT p FROM Post p WHERE p.status = 'PUBLISHED' AND " +
+                        "(LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+                        "LOWER(CAST(p.content AS STRING)) LIKE LOWER(CONCAT('%', :query, '%')))")
+        Page<Post> searchPublishedPosts(@Param("query") String query, Pageable pageable);
 }

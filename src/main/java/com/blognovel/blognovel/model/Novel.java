@@ -38,14 +38,15 @@ public class Novel extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NovelStatus status = NovelStatus.ONGOING;
 
+    @Builder.Default
     private Long viewCount = 0L;
 
+    @Builder.Default
     private Float avgRating = 0F;
 
+    @Builder.Default
     @ManyToMany
-    @JoinTable(name = "novel_genres",
-            joinColumns = @JoinColumn(name = "novel_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    @JoinTable(name = "novel_genres", joinColumns = @JoinColumn(name = "novel_id"), inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private Set<Genre> genres = new HashSet<>();
 
     @OneToMany(mappedBy = "novel", cascade = CascadeType.ALL)

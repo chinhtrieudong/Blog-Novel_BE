@@ -6,9 +6,9 @@ spring:
     name: blog-novel-backend
 
   datasource:
-    url: jdbc:mysql://${MYSQLHOST:mysql}:${MYSQLPORT:3306}/${MYSQLDATABASE:blog_novel_db}
-    username: ${MYSQLUSER:root}
-    password: ${MYSQLPASSWORD:root}
+    url: jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:blog_novel_db}
+    username: ${MYSQLUSER:bloguser}
+    password: ${MYSQLPASSWORD:blogpass}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -48,3 +48,6 @@ springdoc:
 jwt:
   secret: "NPY2VabOYfb1NofHdR93JtKfPBwVVIUNSxOZRUc9FbM="
   expiration: 3600000
+
+cloudinary:
+  url: ${CLOUDINARY_URL:cloudinary://dummy:dummy@dummy}

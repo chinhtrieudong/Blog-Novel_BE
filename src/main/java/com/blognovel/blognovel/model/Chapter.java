@@ -22,10 +22,10 @@ public class Chapter extends BaseEntity {
 
     private Integer chapterNumber;
 
+    @Builder.Default
     private Long viewCount = 0L;
 
     @ManyToOne
     @JoinColumn(name = "novel_id", nullable = false)
     private Novel novel;
 }
-

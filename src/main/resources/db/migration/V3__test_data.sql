@@ -2,7 +2,8 @@
 INSERT INTO users (id, username, email, password, full_name, role, status)
 VALUES
 (1, 'nguyenvana', 'nguyenvana@example.com', '$2a$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJOeQJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 'Nguyễn Văn A', 'USER', 'ACTIVE'),
-(2, 'tranthib', 'tranthib@example.com', '$2a$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJOeQJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 'Trần Thị B', 'USER', 'ACTIVE');
+(2, 'tranthib', 'tranthib@example.com', '$2a$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJOeQJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 'Trần Thị B', 'USER', 'ACTIVE'),
+(3, 'admin', 'admin@example.com', '$2a$10$7QJ8QJ8QJ8QJ8QJ8QJ8QJOeQJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8QJ8', 'Administrator', 'ADMIN', 'ACTIVE');
 
 -- CATEGORIES
 INSERT INTO categories (id, name, slug) VALUES

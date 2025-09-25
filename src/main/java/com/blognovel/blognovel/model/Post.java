@@ -17,42 +17,41 @@ import java.util.Set;
 @AllArgsConstructor
 public class Post extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
-    private String title;
+        private String title;
 
-    @Column(unique = true)
-    private String slug;
+        @Column(unique = true)
+        private String slug;
 
-    @Lob
-    private String content;
+        @Lob
+        private String content;
 
-    private String coverImage;
+        private String coverImage;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id", nullable = false)
-    private User author;
+        @ManyToOne
+        @JoinColumn(name = "author_id", nullable = false)
+        private User author;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private PostStatus status = PostStatus.DRAFT;
+        @Builder.Default
+        @Enumerated(EnumType.STRING)
+        private PostStatus status = PostStatus.DRAFT;
 
-    private Long viewCount = 0L;
+        @Builder.Default
+        private Long viewCount = 0L;
 
-    @ManyToMany
-    @JoinTable(name = "post_categories",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id"))
-    private Set<Category> categories = new HashSet<>();
+        @Builder.Default
+        @ManyToMany
+        @JoinTable(name = "post_categories", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+        private Set<Category> categories = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "post_tags",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private Set<Tag> tags = new HashSet<>();
+        @Builder.Default
+        @ManyToMany
+        @JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+        private Set<Tag> tags = new HashSet<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<Comment> comments;
+        @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+        private List<Comment> comments;
 }
