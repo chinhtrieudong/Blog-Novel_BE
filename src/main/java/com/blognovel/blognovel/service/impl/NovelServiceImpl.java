@@ -5,9 +5,11 @@ import com.blognovel.blognovel.dto.response.NovelResponse;
 import com.blognovel.blognovel.dto.response.PagedResponse;
 import com.blognovel.blognovel.exception.AppException;
 import com.blognovel.blognovel.exception.ErrorCode;
+import com.blognovel.blognovel.mapper.GenreMapper;
 import com.blognovel.blognovel.mapper.NovelMapper;
 import com.blognovel.blognovel.model.Novel;
 import com.blognovel.blognovel.model.User;
+import com.blognovel.blognovel.repository.GenreRepository;
 import com.blognovel.blognovel.repository.NovelRepository;
 import com.blognovel.blognovel.repository.UserRepository;
 import com.blognovel.blognovel.service.CloudinaryService;
@@ -32,7 +34,9 @@ public class NovelServiceImpl implements NovelService {
 
     private final NovelRepository novelRepository;
     private final UserRepository userRepository;
+    private final GenreRepository genreRepository;
     private final NovelMapper novelMapper;
+    private final GenreMapper genreMapper;
     private final CloudinaryService cloudinaryService;
 
     @Override
@@ -40,18 +44,37 @@ public class NovelServiceImpl implements NovelService {
         Specification<Novel> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.hasText(title)) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")),
+                        "%" + title.toLowerCase() + "%"));
             }
             if (genreId != null) {
                 predicates.add(criteriaBuilder.equal(root.get("genreId"), genreId));
             }
             if (StringUtils.hasText(author)) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("author")), "%" + author.toLowerCase() + "%"));
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("author")),
+                        "%" + author.toLowerCase() + "%"));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
         Page<Novel> novels = novelRepository.findAll(spec, pageable);
+        List<NovelResponse> novelResponses = novels.getContent().stream()
+                .map(novelMapper::toResponse)
+                .collect(Collectors.toList());
+
+        return PagedResponse.<NovelResponse>builder()
+                .content(novelResponses)
+                .page(novels.getNumber())
+                .size(novels.getSize())
+                .totalElements(novels.getTotalElements())
+                .totalPages(novels.getTotalPages())
+                .last(novels.isLast())
+                .build();
+    }
+
+    @Override
+    public PagedResponse<NovelResponse> getNovelsByAuthor(Long authorId, Pageable pageable) {
+        Page<Novel> novels = novelRepository.findByAuthorId(authorId, pageable);
         List<NovelResponse> novelResponses = novels.getContent().stream()
                 .map(novelMapper::toResponse)
                 .collect(Collectors.toList());
@@ -75,7 +98,7 @@ public class NovelServiceImpl implements NovelService {
 
     @Override
     public NovelResponse createNovel(NovelRequest novelRequest, Long currentUserId) {
-         User user = userRepository.findById(currentUserId)
+        User user = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Novel novel = novelMapper.toEntity(novelRequest);
@@ -121,33 +144,36 @@ public class NovelServiceImpl implements NovelService {
         novelRepository.delete(novel);
     }
 
-     @Override
+    @Override
     public void likeNovel(Long novelId, Long userId) {
         Novel novel = novelRepository.findById(novelId)
                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
-         User user = userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
     }
 
     @Override
     public void favoriteNovel(Long novelId, Long userId) {
-         Novel novel = novelRepository.findById(novelId)
+        Novel novel = novelRepository.findById(novelId)
                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
-         User user = userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
     public Object getAllGenres() {
-        return null;
+        List<com.blognovel.blognovel.model.Genre> genres = genreRepository.findAll();
+        return genres.stream()
+                .map(genreMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void rateNovel(Long novelId, int rating, Long userId) {
         Novel novel = novelRepository.findById(novelId)
                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
-         User user = userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 }
