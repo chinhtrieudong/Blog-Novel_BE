@@ -88,6 +88,24 @@ public class PostServiceImpl implements PostService {
         }
 
         @Override
+        public PagedResponse<PostResponse> getPostsByAuthor(Long authorId, Pageable pageable) {
+                Page<Post> posts = postRepository.findByAuthorId(authorId, pageable);
+
+                List<PostResponse> postResponses = posts.getContent().stream()
+                                .map(postMapper::toResponse)
+                                .collect(Collectors.toList());
+
+                return PagedResponse.<PostResponse>builder()
+                                .content(postResponses)
+                                .page(posts.getNumber())
+                                .size(posts.getSize())
+                                .totalElements(posts.getTotalElements())
+                                .totalPages(posts.getTotalPages())
+                                .last(posts.isLast())
+                                .build();
+        }
+
+        @Override
         public PostResponse getPostById(Long id) {
                 Post post = postRepository.findById(id)
                                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
@@ -168,7 +186,6 @@ public class PostServiceImpl implements PostService {
                                 throw new AppException(ErrorCode.UPLOAD_FAILED);
                         }
                 }
-
 
                 Post updatedPost = postRepository.save(post);
                 return postMapper.toResponse(updatedPost);

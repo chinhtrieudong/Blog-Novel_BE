@@ -9,12 +9,22 @@ import org.springframework.data.domain.Pageable;
 
 public interface NovelService {
     PagedResponse<NovelResponse> getAllNovels(String title, Long genreId, String author, Pageable pageable);
+
+    PagedResponse<NovelResponse> getNovelsByAuthor(Long authorId, Pageable pageable);
+
     NovelResponse getNovelById(Long id);
+
     NovelResponse createNovel(NovelRequest novelRequest, Long currentUserId);
+
     NovelResponse updateNovel(Long id, NovelRequest novelRequest);
+
     void deleteNovel(Long id);
+
     void likeNovel(Long id, Long userId);
+
     void favoriteNovel(Long id, Long userId);
-    Object getAllGenres(); // Replace Object with appropriate Genre DTO or Entity
+
+    Object getAllGenres();
+
     void rateNovel(Long id, int rating, Long userId);
 }

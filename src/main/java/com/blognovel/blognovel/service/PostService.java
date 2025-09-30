@@ -9,6 +9,8 @@ public interface PostService {
     PagedResponse<PostResponse> getAllPosts(String title, Long categoryId, Long tagId, String status,
             Pageable pageable);
 
+    PagedResponse<PostResponse> getPostsByAuthor(Long authorId, Pageable pageable);
+
     PostResponse getPostById(Long id);
 
     PostResponse createPost(PostRequest request, Long currentUserId);

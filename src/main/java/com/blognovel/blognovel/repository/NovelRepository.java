@@ -19,4 +19,6 @@ public interface NovelRepository extends JpaRepository<Novel, Long>, JpaSpecific
             "(LOWER(n.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(n.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Novel> searchNovels(@Param("query") String query, Pageable pageable);
+
+    Page<Novel> findByAuthorId(Long authorId, Pageable pageable);
 }

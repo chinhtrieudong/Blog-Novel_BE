@@ -26,92 +26,105 @@ import java.security.Principal;
 @Tag(name = "Posts", description = "Endpoints for managing blog posts")
 public class PostController {
 
-    private final PostService postService;
-    private final UserRepository userRepository;
+        private final PostService postService;
+        private final UserRepository userRepository;
 
-    @GetMapping
-    @Operation(summary = "Get all posts", description = "Retrieves a paginated list of posts, with optional filtering.")
-    public ApiResponse<PagedResponse<PostResponse>> getAllPosts(
-            @Parameter(description = "Filter by post title") @RequestParam(required = false) String title,
-            @Parameter(description = "Filter by category ID") @RequestParam(required = false) Long categoryId,
-            @Parameter(description = "Filter by tag ID") @RequestParam(required = false) Long tagId,
-            @Parameter(description = "Filter by post status") @RequestParam(required = false) String status,
-            @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        PagedResponse<PostResponse> posts = postService.getAllPosts(title, categoryId, tagId, status, pageable);
-        return ApiResponse.<PagedResponse<PostResponse>>builder()
-                .code(200)
-                .message("All posts retrieved successfully")
-                .data(posts)
-                .build();
-    }
+        @GetMapping
+        @Operation(summary = "Get all posts", description = "Retrieves a paginated list of posts, with optional filtering.")
+        public ApiResponse<PagedResponse<PostResponse>> getAllPosts(
+                        @Parameter(description = "Filter by post title") @RequestParam(required = false) String title,
+                        @Parameter(description = "Filter by category ID") @RequestParam(required = false) Long categoryId,
+                        @Parameter(description = "Filter by tag ID") @RequestParam(required = false) Long tagId,
+                        @Parameter(description = "Filter by post status") @RequestParam(required = false) String status,
+                        @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size) {
+                Pageable pageable = PageRequest.of(page, size);
+                PagedResponse<PostResponse> posts = postService.getAllPosts(title, categoryId, tagId, status, pageable);
+                return ApiResponse.<PagedResponse<PostResponse>>builder()
+                                .code(200)
+                                .message("All posts retrieved successfully")
+                                .data(posts)
+                                .build();
+        }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get post by ID", description = "Retrieves a specific post by its unique identifier.")
-    public ApiResponse<PostResponse> getPostById(@Parameter(description = "Post ID") @PathVariable Long id) {
-        PostResponse post = postService.getPostById(id);
-        return ApiResponse.<PostResponse>builder()
-                .code(200)
-                .message("Post retrieved successfully")
-                .data(post)
-                .build();
-    }
+        @GetMapping("/user/{userId}")
+        @Operation(summary = "Get posts by user", description = "Retrieves a paginated list of posts by a specific user.")
+        public ApiResponse<PagedResponse<PostResponse>> getPostsByUser(
+                        @Parameter(description = "User ID") @PathVariable Long userId,
+                        @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size) {
+                Pageable pageable = PageRequest.of(page, size);
+                PagedResponse<PostResponse> posts = postService.getPostsByAuthor(userId, pageable);
+                return ApiResponse.<PagedResponse<PostResponse>>builder()
+                                .code(200)
+                                .message("Posts by user retrieved successfully")
+                                .data(posts)
+                                .build();
+        }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    @Operation(summary = "Create a new post (Admin only)", description = "Creates a new blog post. Requires ADMIN role.")
-    public ApiResponse<PostResponse> createPost(
-            @RequestBody PostRequest request,
-            @Parameter(hidden = true) Principal principal) { // Hide Principal
-        Long authorId = getCurrentUserId(principal);
-        PostResponse createdPost = postService.createPost(request, authorId);
-        return ApiResponse.<PostResponse>builder()
-                .code(201)
-                .message("Post created successfully")
-                .data(createdPost)
-                .build();
-    }
+        @GetMapping("/{id}")
+        @Operation(summary = "Get post by ID", description = "Retrieves a specific post by its unique identifier.")
+        public ApiResponse<PostResponse> getPostById(@Parameter(description = "Post ID") @PathVariable Long id) {
+                PostResponse post = postService.getPostById(id);
+                return ApiResponse.<PostResponse>builder()
+                                .code(200)
+                                .message("Post retrieved successfully")
+                                .data(post)
+                                .build();
+        }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
-    @Operation(summary = "Update post (Admin only)", description = "Updates an existing blog post. Requires ADMIN role.")
-    public ApiResponse<PostResponse> updatePost(
-            @Parameter(description = "Post ID") @PathVariable Long id,
-            @RequestBody PostRequest request) {
-        PostResponse updatedPost = postService.updatePost(id, request);
-        return ApiResponse.<PostResponse>builder()
-                .code(200)
-                .message("Post updated successfully")
-                .data(updatedPost)
-                .build();
-    }
+        @PreAuthorize("isAuthenticated()")
+        @PostMapping
+        @Operation(summary = "Create a new post", description = "Creates a new blog post. Requires authentication.")
+        public ApiResponse<PostResponse> createPost(
+                        @RequestBody PostRequest request,
+                        @Parameter(hidden = true) Principal principal) {
+                Long authorId = getCurrentUserId(principal);
+                PostResponse createdPost = postService.createPost(request, authorId);
+                return ApiResponse.<PostResponse>builder()
+                                .code(201)
+                                .message("Post created successfully")
+                                .data(createdPost)
+                                .build();
+        }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete post (Admin only)", description = "Deletes a blog post. Requires ADMIN role.")
-    public ApiResponse<Void> deletePost(@Parameter(description = "Post ID") @PathVariable Long id) {
-        postService.deletePost(id);
-        return ApiResponse.<Void>builder()
-                .code(200)
-                .message("Post deleted successfully")
-                .build();
-    }
+        @PutMapping("/{id}")
+        @Operation(summary = "Update post (Admin only)", description = "Updates an existing blog post. Requires ADMIN role.")
+        public ApiResponse<PostResponse> updatePost(
+                        @Parameter(description = "Post ID") @PathVariable Long id,
+                        @RequestBody PostRequest request) {
+                PostResponse updatedPost = postService.updatePost(id, request);
+                return ApiResponse.<PostResponse>builder()
+                                .code(200)
+                                .message("Post updated successfully")
+                                .data(updatedPost)
+                                .build();
+        }
 
-    @PostMapping("/{id}/views")
-    @Operation(summary = "Increment view count", description = "Increments the view count for a specific post.")
-    public ApiResponse<Void> incrementViewCount(@Parameter(description = "Post ID") @PathVariable Long id) {
-        postService.incrementViewCount(id);
-        return ApiResponse.<Void>builder()
-                .code(200)
-                .message("Post view count incremented successfully")
-                .build();
-    }
+        @DeleteMapping("/{id}")
+        @Operation(summary = "Delete post (Admin only)", description = "Deletes a blog post. Requires ADMIN role.")
+        public ApiResponse<Void> deletePost(@Parameter(description = "Post ID") @PathVariable Long id) {
+                postService.deletePost(id);
+                return ApiResponse.<Void>builder()
+                                .code(200)
+                                .message("Post deleted successfully")
+                                .build();
+        }
 
-    private Long getCurrentUserId(Principal principal) {
-        String username = principal.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        return user.getId();
-    }
+        @PostMapping("/{id}/views")
+        @Operation(summary = "Increment view count", description = "Increments the view count for a specific post.")
+        public ApiResponse<Void> incrementViewCount(@Parameter(description = "Post ID") @PathVariable Long id) {
+                postService.incrementViewCount(id);
+                return ApiResponse.<Void>builder()
+                                .code(200)
+                                .message("Post view count incremented successfully")
+                                .build();
+        }
+
+        private Long getCurrentUserId(Principal principal) {
+                String username = principal.getName();
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                return user.getId();
+        }
 }

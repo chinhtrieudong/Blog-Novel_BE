@@ -35,4 +35,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
                         "(LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
                         "LOWER(CAST(p.content AS STRING)) LIKE LOWER(CONCAT('%', :query, '%')))")
         Page<Post> searchPublishedPosts(@Param("query") String query, Pageable pageable);
+
+        Page<Post> findByAuthorId(Long authorId, Pageable pageable);
 }
