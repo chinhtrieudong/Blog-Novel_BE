@@ -69,10 +69,9 @@ public class NovelController {
                                 .build();
         }
 
-        @PreAuthorize("isAuthenticated()")
         @PostMapping
         @Operation(summary = "Create a new novel", description = "Creates a new novel. Requires authentication.")
-        public ApiResponse<NovelResponse> createNovel(@RequestBody NovelRequest novelRequest, Principal principal) {
+        public ApiResponse<NovelResponse> createNovel(@ModelAttribute NovelRequest novelRequest, Principal principal) {
                 Long userId = userService.getCurrentUser(principal.getName()).getId();
                 NovelResponse createdNovel = novelService.createNovel(novelRequest, userId);
                 return ApiResponse.<NovelResponse>builder()
@@ -86,7 +85,7 @@ public class NovelController {
         @Operation(summary = "Update novel (Admin only)", description = "Updates an existing novel. Requires ADMIN role.")
         public ApiResponse<NovelResponse> updateNovel(
                         @Parameter(description = "Novel ID") @PathVariable Long id,
-                        @RequestBody NovelRequest novelRequest) {
+                        @ModelAttribute NovelRequest novelRequest) {
                 return ApiResponse.<NovelResponse>builder()
                                 .code(200)
                                 .message("Novel updated successfully")
@@ -149,6 +148,19 @@ public class NovelController {
                 return ApiResponse.<Void>builder()
                                 .code(200)
                                 .message("Novel rated successfully")
+                                .build();
+        }
+
+        @PatchMapping("/{id}/status")
+        @Operation(summary = "Update novel status", description = "Updates the status of a specific novel. Requires authentication.")
+        public ApiResponse<NovelResponse> updateNovelStatus(
+                        @Parameter(description = "Novel ID") @PathVariable Long id,
+                        @Parameter(description = "New status (ONGOING, COMPLETED, HIATUS, CANCELLED)") @RequestParam String status) {
+                NovelResponse updatedNovel = novelService.updateNovelStatus(id, status);
+                return ApiResponse.<NovelResponse>builder()
+                                .code(200)
+                                .message("Novel status updated successfully")
+                                .data(updatedNovel)
                                 .build();
         }
 }

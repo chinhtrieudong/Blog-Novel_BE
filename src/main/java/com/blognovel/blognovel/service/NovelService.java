@@ -27,4 +27,6 @@ public interface NovelService {
     Object getAllGenres();
 
     void rateNovel(Long id, int rating, Long userId);
+
+    NovelResponse updateNovelStatus(Long id, String status);
 }

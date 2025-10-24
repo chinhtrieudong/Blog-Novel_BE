@@ -22,7 +22,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,17 +100,9 @@ public class NovelServiceImpl implements NovelService {
         User user = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        Novel novel = novelMapper.toEntity(novelRequest);
+        Novel novel = novelMapper.toEntity(novelRequest, cloudinaryService);
 
         novel.setAuthor(user);
-        if (novelRequest.getCoverImage() != null && !novelRequest.getCoverImage().isEmpty()) {
-            try {
-                String imageUrl = cloudinaryService.uploadImage(novelRequest.getCoverImage());
-                novel.setCoverImage(imageUrl);
-            } catch (IOException e) {
-                throw new AppException(ErrorCode.UPLOAD_FAILED);
-            }
-        }
 
         Novel savedNovel = novelRepository.save(novel);
         return novelMapper.toResponse(savedNovel);
@@ -122,17 +113,9 @@ public class NovelServiceImpl implements NovelService {
         Novel novel = novelRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
 
-        novelMapper.updateNovelFromDto(novelRequest, novel);
+        novelMapper.updateNovelFromDto(novelRequest, novel, cloudinaryService);
 
-        if (novelRequest.getCoverImage() != null && !novelRequest.getCoverImage().isEmpty()) {
-            try {
-                String imageUrl = cloudinaryService.uploadImage(novelRequest.getCoverImage());
-                novel.setCoverImage(imageUrl);
-            } catch (IOException e) {
-                throw new AppException(ErrorCode.UPLOAD_FAILED);
-            }
-        }
-
+        // Remove manual updatedAt setting - let @UpdateTimestamp handle it
         Novel updatedNovel = novelRepository.save(novel);
         return novelMapper.toResponse(updatedNovel);
     }
@@ -175,5 +158,24 @@ public class NovelServiceImpl implements NovelService {
                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    public NovelResponse updateNovelStatus(Long id, String status) {
+        Novel novel = novelRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
+
+        try {
+            com.blognovel.blognovel.enums.NovelStatus newStatus = com.blognovel.blognovel.enums.NovelStatus
+                    .valueOf(status.toUpperCase());
+            novel.setStatus(newStatus);
+
+            Novel updatedNovel = novelRepository.save(novel);
+            return novelMapper.toResponse(updatedNovel);
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.INVALID_STATUS);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.UPLOAD_FAILED);
+        }
     }
 }

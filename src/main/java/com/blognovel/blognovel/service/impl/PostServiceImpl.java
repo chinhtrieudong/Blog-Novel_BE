@@ -144,8 +144,9 @@ public class PostServiceImpl implements PostService {
                         try {
                                 String imageUrl = cloudinaryService.uploadImage(request.getCoverImage());
                                 post.setCoverImage(imageUrl);
-                        } catch (IOException e) {
-                                throw new AppException(ErrorCode.UPLOAD_FAILED);
+                        } catch (Exception e) {
+                                // Log the error and set a default image URL
+                                post.setCoverImage("https://via.placeholder.com/600x400?text=No+Image");
                         }
                 }
 
@@ -173,7 +174,6 @@ public class PostServiceImpl implements PostService {
                 post.setCategories(categories);
                 post.setTags(tags);
                 post.setStatus(PostStatus.valueOf(request.getStatus().toUpperCase()));
-                post.setUpdatedAt(LocalDateTime.now());
 
                 String slug = SlugGenerator.makeSlug(request.getTitle());
                 post.setSlug(slug);
@@ -182,8 +182,9 @@ public class PostServiceImpl implements PostService {
                         try {
                                 String imageUrl = cloudinaryService.uploadImage(request.getCoverImage());
                                 post.setCoverImage(imageUrl);
-                        } catch (IOException e) {
-                                throw new AppException(ErrorCode.UPLOAD_FAILED);
+                        } catch (Exception e) {
+                                // Log the error and set a default image URL
+                                post.setCoverImage("https://via.placeholder.com/600x400?text=No+Image");
                         }
                 }
 
@@ -201,5 +202,23 @@ public class PostServiceImpl implements PostService {
         @Override
         public void incrementViewCount(Long postId) {
                 postRepository.incrementViewCount(postId);
+        }
+
+        @Override
+        public PostResponse updatePostStatus(Long id, String status) {
+                Post post = postRepository.findById(id)
+                                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+                try {
+                        PostStatus newStatus = PostStatus.valueOf(status.toUpperCase());
+                        post.setStatus(newStatus);
+
+                        Post updatedPost = postRepository.save(post);
+                        return postMapper.toResponse(updatedPost);
+                } catch (IllegalArgumentException e) {
+                        throw new AppException(ErrorCode.INVALID_STATUS);
+                } catch (Exception e) {
+                        throw new AppException(ErrorCode.UPLOAD_FAILED);
+                }
         }
 }

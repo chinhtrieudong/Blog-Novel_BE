@@ -20,4 +20,6 @@ public interface PostService {
     void deletePost(Long id);
 
     void incrementViewCount(Long postId);
+
+    PostResponse updatePostStatus(Long id, String status);
 }

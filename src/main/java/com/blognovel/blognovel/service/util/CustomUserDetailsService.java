@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         com.blognovel.blognovel.model.User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
         UserDetails userDetails = new User(user.getUsername(), user.getPassword(), Arrays.asList(grantedAuthority));

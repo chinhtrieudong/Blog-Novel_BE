@@ -24,17 +24,10 @@ public class FileUploadController {
 
     private final CloudinaryService cloudinaryService;
 
-    @PostMapping(
-            value = "/novels/cover-image",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping(value = "/novels/cover-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload novel cover image", description = "Uploads a cover image for a novel to Cloudinary")
     public ResponseEntity<ApiResponse<String>> uploadNovelCoverImage(
-            @Parameter(description = "File to upload", required = true,
-                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(type = "string", format = "binary")))
-            @RequestPart("image") MultipartFile image
-    ) {
+            @Parameter(description = "File to upload", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE, schema = @Schema(type = "string", format = "binary"))) @RequestPart("image") MultipartFile image) {
         try {
             String imageUrl = cloudinaryService.uploadImage(image);
             ApiResponse<String> response = ApiResponse.<String>builder()
@@ -54,7 +47,8 @@ public class FileUploadController {
 
     @DeleteMapping("/novels/cover-image")
     @Operation(summary = "Delete novel cover image", description = "Deletes a novel cover image from Cloudinary")
-    public ApiResponse<String> deleteNovelCoverImage(@Parameter(description = "Public ID of the image to delete", required = true) @RequestParam("publicId") String publicId) {
+    public ApiResponse<String> deleteNovelCoverImage(
+            @Parameter(description = "Public ID of the image to delete", required = true) @RequestParam("publicId") String publicId) {
         try {
             String result = cloudinaryService.deleteImage(publicId);
             return ApiResponse.<String>builder()

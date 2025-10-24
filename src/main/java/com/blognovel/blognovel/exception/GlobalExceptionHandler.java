@@ -53,6 +53,21 @@ public class GlobalExceptionHandler {
                                 .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Access denied"));
         }
 
+        @ExceptionHandler(RuntimeException.class)
+        public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+                return ResponseEntity
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                                "Runtime error: " + ex.getMessage()));
+        }
+
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+        }
+
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
                 return ResponseEntity

@@ -97,6 +97,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- H2 Database for testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -150,12 +157,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- H2 Database for testing -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
+
 
         <!--	redis	-->
         <dependency>

@@ -27,20 +27,23 @@ public class CloudinaryConfig {
                 String apiSecret = userInfo[1];
                 String cloudName = cloudinaryUri.getHost();
 
+                if ("dummy".equals(cloudName) || "dummy".equals(apiKey) || "dummy".equals(apiSecret)) {
+                    // Log warning but don't throw exception to allow application startup
+                    System.err.println(
+                            "WARNING: Cloudinary credentials are not configured. Please set the CLOUDINARY_URL environment variable with valid credentials.");
+                    System.err.println("Using dummy credentials - Cloudinary functionality will not work properly.");
+                }
+
                 config.put("cloud_name", cloudName);
                 config.put("api_key", apiKey);
                 config.put("api_secret", apiSecret);
             } catch (URISyntaxException e) {
-                // For dummy URLs, set dummy values
-                config.put("cloud_name", "dummy");
-                config.put("api_key", "dummy");
-                config.put("api_secret", "dummy");
+                throw new IllegalArgumentException(
+                        "Invalid Cloudinary URL format. Please check the CLOUDINARY_URL environment variable.", e);
             }
         } else {
-            // Fallback for dummy
-            config.put("cloud_name", "dummy");
-            config.put("api_key", "dummy");
-            config.put("api_secret", "dummy");
+            throw new IllegalArgumentException(
+                    "Cloudinary URL must start with 'cloudinary://'. Please set the CLOUDINARY_URL environment variable.");
         }
 
         return new Cloudinary(config);

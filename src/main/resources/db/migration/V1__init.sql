@@ -23,7 +23,7 @@ CREATE TABLE posts
     content     LONGTEXT,
     cover_image VARCHAR(255),
     author_id   BIGINT              NOT NULL,
-    status      ENUM ('DRAFT','PUBLISHED','ARCHIVED') DEFAULT 'DRAFT',
+    status      ENUM ('DRAFT','PUBLISHED','ARCHIVED','PENDING_REVIEW') DEFAULT 'DRAFT',
     view_count  BIGINT                                DEFAULT 0,
     created_at  TIMESTAMP                             DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP                             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

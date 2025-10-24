@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -73,11 +72,10 @@ public class PostController {
                                 .build();
         }
 
-        @PreAuthorize("isAuthenticated()")
         @PostMapping
         @Operation(summary = "Create a new post", description = "Creates a new blog post. Requires authentication.")
         public ApiResponse<PostResponse> createPost(
-                        @RequestBody PostRequest request,
+                        @ModelAttribute PostRequest request,
                         @Parameter(hidden = true) Principal principal) {
                 Long authorId = getCurrentUserId(principal);
                 PostResponse createdPost = postService.createPost(request, authorId);
@@ -92,7 +90,7 @@ public class PostController {
         @Operation(summary = "Update post (Admin only)", description = "Updates an existing blog post. Requires ADMIN role.")
         public ApiResponse<PostResponse> updatePost(
                         @Parameter(description = "Post ID") @PathVariable Long id,
-                        @RequestBody PostRequest request) {
+                        @ModelAttribute PostRequest request) {
                 PostResponse updatedPost = postService.updatePost(id, request);
                 return ApiResponse.<PostResponse>builder()
                                 .code(200)
@@ -118,6 +116,19 @@ public class PostController {
                 return ApiResponse.<Void>builder()
                                 .code(200)
                                 .message("Post view count incremented successfully")
+                                .build();
+        }
+
+        @PatchMapping("/{id}/status")
+        @Operation(summary = "Update post status", description = "Updates the status of a specific post. Requires authentication.")
+        public ApiResponse<PostResponse> updatePostStatus(
+                        @Parameter(description = "Post ID") @PathVariable Long id,
+                        @Parameter(description = "New status (DRAFT, PUBLISHED, ARCHIVED, PENDING_REVIEW)") @RequestParam String status) {
+                PostResponse updatedPost = postService.updatePostStatus(id, status);
+                return ApiResponse.<PostResponse>builder()
+                                .code(200)
+                                .message("Post status updated successfully")
+                                .data(updatedPost)
                                 .build();
         }
 

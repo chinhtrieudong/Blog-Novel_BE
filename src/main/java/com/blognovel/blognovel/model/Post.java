@@ -37,6 +37,7 @@ public class Post extends BaseEntity {
 
         @Builder.Default
         @Enumerated(EnumType.STRING)
+        @Column(name = "status")
         private PostStatus status = PostStatus.DRAFT;
 
         @Builder.Default

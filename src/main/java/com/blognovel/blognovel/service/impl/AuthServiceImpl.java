@@ -85,8 +85,7 @@ public class AuthServiceImpl implements AuthService {
         if (user != null) {
             String token = UUID.randomUUID().toString();
             redisTemplate.opsForValue().set(RESET_PREFIX + token, user.getUsername(), 15, TimeUnit.MINUTES);
-            // TODO: Gửi email thực tế, tạm thời log ra console
-            System.out.println("Reset password link: http://yourdomain/reset-password?token=" + token);
+            // TODO: Implement email service to send reset password link
         }
     }
 

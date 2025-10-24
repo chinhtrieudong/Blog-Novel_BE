@@ -36,6 +36,7 @@ public class Novel extends BaseEntity {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private NovelStatus status = NovelStatus.ONGOING;
 
     @Builder.Default

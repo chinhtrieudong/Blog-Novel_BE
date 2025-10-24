@@ -50,4 +50,4 @@ jwt:
   expiration: 3600000
 
 cloudinary:
-  url: ${CLOUDINARY_URL:cloudinary://dummy:dummy@dummy}
+  url: ${CLOUDINARY_URL:cloudinary://891526691911467:TnwTqA61t4ZiVvnWt8h0iQVZnII@ddoesja29}
