@@ -15,6 +15,7 @@ public enum ErrorCode {
     TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "Tag not found"),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Comment not found"),
     NOVEL_NOT_FOUND(HttpStatus.NOT_FOUND, "Novel not found"),
+    CHAPTER_NOT_FOUND(HttpStatus.NOT_FOUND, "Chapter not found"),
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "Unauthorized access"),
     UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Image upload failed"),
     CLOUDINARY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Cloudinary service error"),

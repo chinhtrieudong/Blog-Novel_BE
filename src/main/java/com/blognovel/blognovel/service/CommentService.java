@@ -10,9 +10,13 @@ public interface CommentService {
 
     List<CommentResponse> getCommentsForNovel(Long novelId);
 
+    List<CommentResponse> getCommentsForChapter(Long chapterId);
+
     CommentResponse addCommentToPost(Long postId, CommentRequest request, Long userId);
 
     CommentResponse addCommentToNovel(Long novelId, CommentRequest request, Long userId);
+
+    CommentResponse addCommentToChapter(Long chapterId, CommentRequest request, Long userId);
 
     CommentResponse updateComment(Long commentId, CommentRequest request, Long userId);
 

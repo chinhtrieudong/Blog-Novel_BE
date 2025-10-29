@@ -78,6 +78,35 @@ public class CommentController {
                                 .build();
         }
 
+        @GetMapping("/novels/{novelId}/chapters/{chapterId}/comments")
+        @Operation(summary = "Get comments for a chapter", description = "Retrieves all top-level comments for a specific chapter.")
+        public ApiResponse<List<CommentResponse>> getCommentsForChapter(
+                        @Parameter(description = "Novel ID") @PathVariable Long novelId,
+                        @Parameter(description = "Chapter ID") @PathVariable Long chapterId) {
+                List<CommentResponse> comments = commentService.getCommentsForChapter(chapterId);
+                return ApiResponse.<List<CommentResponse>>builder()
+                                .code(200)
+                                .message("Chapter comments retrieved successfully")
+                                .data(comments)
+                                .build();
+        }
+
+        @PostMapping("/novels/{novelId}/chapters/{chapterId}/comments")
+        @Operation(summary = "Add comment to a chapter", description = "Adds a new comment to a specific chapter.")
+        public ApiResponse<CommentResponse> addCommentToChapter(
+                        @Parameter(description = "Novel ID") @PathVariable Long novelId,
+                        @Parameter(description = "Chapter ID") @PathVariable Long chapterId,
+                        @Valid @RequestBody CommentRequest request,
+                        Principal principal) {
+                Long userId = userService.getCurrentUser(principal.getName()).getId();
+                CommentResponse comment = commentService.addCommentToChapter(chapterId, request, userId);
+                return ApiResponse.<CommentResponse>builder()
+                                .code(201)
+                                .message("Chapter comment added successfully")
+                                .data(comment)
+                                .build();
+        }
+
         @PutMapping("/comments/{commentId}")
         @Operation(summary = "Update comment", description = "Updates a comment. Only the author can update their comment.")
         public ApiResponse<CommentResponse> updateComment(

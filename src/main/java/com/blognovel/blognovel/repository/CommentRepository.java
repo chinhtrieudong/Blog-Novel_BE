@@ -19,6 +19,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpec
     @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.replies WHERE c.novel.id = :novelId AND c.parent IS NULL ORDER BY c.createdAt ASC")
     List<Comment> findByNovelIdAndParentIsNullOrderByCreatedAtAsc(Long novelId);
 
+    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.replies WHERE c.chapter.id = :chapterId AND c.parent IS NULL ORDER BY c.createdAt ASC")
+    List<Comment> findByChapterIdAndParentIsNullOrderByCreatedAtAsc(Long chapterId);
+
     @Modifying
     @Query("UPDATE Comment c SET c.likeCount = c.likeCount + 1 WHERE c.id = :commentId")
     void incrementLikeCount(@Param("commentId") Long commentId);

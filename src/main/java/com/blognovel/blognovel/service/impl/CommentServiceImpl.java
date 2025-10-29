@@ -5,10 +5,12 @@ import com.blognovel.blognovel.dto.response.CommentResponse;
 import com.blognovel.blognovel.exception.AppException;
 import com.blognovel.blognovel.exception.ErrorCode;
 import com.blognovel.blognovel.mapper.CommentMapper;
+import com.blognovel.blognovel.model.Chapter;
 import com.blognovel.blognovel.model.Comment;
 import com.blognovel.blognovel.model.Novel;
 import com.blognovel.blognovel.model.Post;
 import com.blognovel.blognovel.model.User;
+import com.blognovel.blognovel.repository.ChapterRepository;
 import com.blognovel.blognovel.repository.CommentRepository;
 import com.blognovel.blognovel.repository.NovelRepository;
 import com.blognovel.blognovel.repository.PostRepository;
@@ -27,6 +29,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final NovelRepository novelRepository;
+    private final ChapterRepository chapterRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
 
@@ -78,6 +81,36 @@ public class CommentServiceImpl implements CommentService {
                 .content(request.getContent())
                 .user(user)
                 .novel(novel)
+                .build();
+
+        if (request.getParentId() != null) {
+            Comment parent = commentRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+            comment.setParent(parent);
+        }
+
+        Comment saved = commentRepository.save(comment);
+        return commentMapper.toResponse(saved);
+    }
+
+    @Override
+    public List<CommentResponse> getCommentsForChapter(Long chapterId) {
+        List<Comment> comments = commentRepository.findByChapterIdAndParentIsNullOrderByCreatedAtAsc(chapterId);
+        return commentMapper.toResponseList(comments);
+    }
+
+    @Override
+    @Transactional
+    public CommentResponse addCommentToChapter(Long chapterId, CommentRequest request, Long userId) {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new AppException(ErrorCode.CHAPTER_NOT_FOUND));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Comment comment = Comment.builder()
+                .content(request.getContent())
+                .user(user)
+                .chapter(chapter)
                 .build();
 
         if (request.getParentId() != null) {

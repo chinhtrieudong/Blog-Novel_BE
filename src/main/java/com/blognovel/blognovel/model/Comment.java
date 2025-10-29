@@ -34,6 +34,10 @@ public class Comment extends BaseEntity {
     private Novel novel;
 
     @ManyToOne
+    @JoinColumn(name = "chapter_id")
+    private Chapter chapter;
+
+    @ManyToOne
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
