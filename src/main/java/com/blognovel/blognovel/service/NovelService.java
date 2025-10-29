@@ -12,11 +12,17 @@ public interface NovelService {
 
     PagedResponse<NovelResponse> getNovelsByAuthor(Long authorId, Pageable pageable);
 
+    PagedResponse<NovelResponse> getNovelsByAuthorName(String authorName, Pageable pageable);
+
+    PagedResponse<NovelResponse> getNovelsByCreator(Long creatorId, Pageable pageable);
+
     NovelResponse getNovelById(Long id);
+
+    PagedResponse<NovelResponse> getRelatedNovels(Long novelId, Pageable pageable);
 
     NovelResponse createNovel(NovelRequest novelRequest, Long currentUserId);
 
-    NovelResponse updateNovel(Long id, NovelRequest novelRequest);
+    NovelResponse updateNovel(Long id, NovelRequest novelRequest, Long currentUserId);
 
     void deleteNovel(Long id);
 

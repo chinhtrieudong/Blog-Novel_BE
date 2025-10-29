@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 import java.security.Principal;
 
 @RestController
@@ -43,17 +45,32 @@ public class NovelController {
                                 .build();
         }
 
-        @GetMapping("/user/{userId}")
-        @Operation(summary = "Get novels by user", description = "Retrieves a paginated list of novels by a specific user.")
-        public ApiResponse<PagedResponse<NovelResponse>> getNovelsByUser(
-                        @Parameter(description = "User ID") @PathVariable Long userId,
+        @GetMapping("/author/{authorId}")
+        @Operation(summary = "Get novels by author", description = "Retrieves a paginated list of novels by a specific author.")
+        public ApiResponse<PagedResponse<NovelResponse>> getNovelsByAuthor(
+                        @Parameter(description = "Author ID") @PathVariable Long authorId,
                         @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
                         @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size) {
                 Pageable pageable = PageRequest.of(page, size);
-                PagedResponse<NovelResponse> novels = novelService.getNovelsByAuthor(userId, pageable);
+                PagedResponse<NovelResponse> novels = novelService.getNovelsByAuthor(authorId, pageable);
                 return ApiResponse.<PagedResponse<NovelResponse>>builder()
                                 .code(200)
-                                .message("Novels by user retrieved successfully")
+                                .message("Novels by author retrieved successfully")
+                                .data(novels)
+                                .build();
+        }
+
+        @GetMapping("/creator/{creatorId}")
+        @Operation(summary = "Get novels by creator", description = "Retrieves a paginated list of novels created by a specific user.")
+        public ApiResponse<PagedResponse<NovelResponse>> getNovelsByCreator(
+                        @Parameter(description = "Creator User ID") @PathVariable Long creatorId,
+                        @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size) {
+                Pageable pageable = PageRequest.of(page, size);
+                PagedResponse<NovelResponse> novels = novelService.getNovelsByCreator(creatorId, pageable);
+                return ApiResponse.<PagedResponse<NovelResponse>>builder()
+                                .code(200)
+                                .message("Novels by creator retrieved successfully")
                                 .data(novels)
                                 .build();
         }
@@ -69,27 +86,51 @@ public class NovelController {
                                 .build();
         }
 
+        @GetMapping("/related/{id}")
+        @Operation(summary = "Get related novels", description = "Retrieves novels related to the specified novel (same genre).")
+        public ApiResponse<PagedResponse<NovelResponse>> getRelatedNovels(
+                        @Parameter(description = "Novel ID") @PathVariable Long id,
+                        @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size) {
+                Pageable pageable = PageRequest.of(page, size);
+                PagedResponse<NovelResponse> novels = novelService.getRelatedNovels(id, pageable);
+                return ApiResponse.<PagedResponse<NovelResponse>>builder()
+                                .code(200)
+                                .message("Related novels retrieved successfully")
+                                .data(novels)
+                                .build();
+        }
+
         @PostMapping
         @Operation(summary = "Create a new novel", description = "Creates a new novel. Requires authentication.")
-        public ApiResponse<NovelResponse> createNovel(@ModelAttribute NovelRequest novelRequest, Principal principal) {
-                Long userId = userService.getCurrentUser(principal.getName()).getId();
-                NovelResponse createdNovel = novelService.createNovel(novelRequest, userId);
-                return ApiResponse.<NovelResponse>builder()
-                                .code(201)
-                                .message("Novel created successfully")
-                                .data(createdNovel)
-                                .build();
+        public ApiResponse<NovelResponse> createNovel(@Valid @ModelAttribute NovelRequest novelRequest,
+                        Principal principal) {
+                try {
+                        Long userId = userService.getCurrentUser(principal.getName()).getId();
+                        NovelResponse createdNovel = novelService.createNovel(novelRequest, userId);
+                        return ApiResponse.<NovelResponse>builder()
+                                        .code(201)
+                                        .message("Novel created successfully")
+                                        .data(createdNovel)
+                                        .build();
+                } catch (Exception e) {
+                        System.err.println("Error creating novel: " + e.getMessage());
+                        e.printStackTrace();
+                        throw e;
+                }
         }
 
         @PutMapping("/{id}")
         @Operation(summary = "Update novel (Admin only)", description = "Updates an existing novel. Requires ADMIN role.")
         public ApiResponse<NovelResponse> updateNovel(
                         @Parameter(description = "Novel ID") @PathVariable Long id,
-                        @ModelAttribute NovelRequest novelRequest) {
+                        @Valid @ModelAttribute NovelRequest novelRequest,
+                        Principal principal) {
+                Long userId = userService.getCurrentUser(principal.getName()).getId();
                 return ApiResponse.<NovelResponse>builder()
                                 .code(200)
                                 .message("Novel updated successfully")
-                                .data(novelService.updateNovel(id, novelRequest))
+                                .data(novelService.updateNovel(id, novelRequest, userId))
                                 .build();
         }
 
@@ -155,7 +196,7 @@ public class NovelController {
         @Operation(summary = "Update novel status", description = "Updates the status of a specific novel. Requires authentication.")
         public ApiResponse<NovelResponse> updateNovelStatus(
                         @Parameter(description = "Novel ID") @PathVariable Long id,
-                        @Parameter(description = "New status (ONGOING, COMPLETED, HIATUS, CANCELLED)") @RequestParam String status) {
+                        @Parameter(description = "New status (DRAFT, ONGOING, COMPLETED, HIATUS, CANCELLED, DROPPED)") @RequestParam String status) {
                 NovelResponse updatedNovel = novelService.updateNovelStatus(id, status);
                 return ApiResponse.<NovelResponse>builder()
                                 .code(200)
