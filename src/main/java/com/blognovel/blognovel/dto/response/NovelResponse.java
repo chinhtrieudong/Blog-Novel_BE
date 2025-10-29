@@ -14,7 +14,7 @@ public class NovelResponse {
     private String slug;
     private String description;
     private String coverImage;
-    private UserResponse author;
+    private AuthorResponse author;
     private NovelStatus status;
     private Long viewCount;
     private Float avgRating;

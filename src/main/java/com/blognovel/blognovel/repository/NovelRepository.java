@@ -21,4 +21,9 @@ public interface NovelRepository extends JpaRepository<Novel, Long>, JpaSpecific
     Page<Novel> searchNovels(@Param("query") String query, Pageable pageable);
 
     Page<Novel> findByAuthorId(Long authorId, Pageable pageable);
+
+    Page<Novel> findByCreatedBy(Long createdBy, Pageable pageable);
+
+    @Query("SELECT n FROM Novel n WHERE n.author.name LIKE %:authorName%")
+    Page<Novel> findByAuthorName(@Param("authorName") String authorName, Pageable pageable);
 }

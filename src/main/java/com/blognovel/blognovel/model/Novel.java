@@ -32,7 +32,7 @@ public class Novel extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
-    private User author;
+    private Author author;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

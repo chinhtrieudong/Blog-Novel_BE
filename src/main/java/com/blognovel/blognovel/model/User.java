@@ -46,7 +46,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
-    private List<Novel> novels;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Author> authors;
 
 }

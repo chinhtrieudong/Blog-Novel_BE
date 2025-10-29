@@ -18,7 +18,8 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "Unauthorized access"),
     UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Image upload failed"),
     CLOUDINARY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Cloudinary service error"),
-    INVALID_FILE_FORMAT(HttpStatus.BAD_REQUEST, "Invalid file format. Only image files are allowed"),;
+    INVALID_FILE_FORMAT(HttpStatus.BAD_REQUEST, "Invalid file format. Only image files are allowed"),
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Invalid request data"),;
 
     private final HttpStatus status;
     private final String message;
