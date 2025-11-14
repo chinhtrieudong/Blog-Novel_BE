@@ -33,8 +33,10 @@ public interface CommentMapper {
                 .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole().name())
                 .status(user.getStatus().name())
-                .createdAt(user.getCreatedAt().toString())
-                .updatedAt(user.getUpdatedAt().toString())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .createdBy(user.getCreatedBy())
+                .updatedBy(user.getUpdatedBy())
                 .build();
     }
 }

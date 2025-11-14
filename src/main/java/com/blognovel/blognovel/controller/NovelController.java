@@ -204,4 +204,14 @@ public class NovelController {
                                 .data(updatedNovel)
                                 .build();
         }
+
+        @PostMapping("/{id}/views")
+        @Operation(summary = "Increment novel views", description = "Increments the view count for a specific novel.")
+        public ApiResponse<Void> incrementNovelViews(@Parameter(description = "Novel ID") @PathVariable Long id) {
+                novelService.incrementViewCount(id);
+                return ApiResponse.<Void>builder()
+                                .code(200)
+                                .message("Novel views incremented successfully")
+                                .build();
+        }
 }

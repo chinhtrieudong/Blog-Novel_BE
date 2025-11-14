@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -12,4 +14,8 @@ public class AuthorResponse {
     private String name;
     private String bio;
     private String avatarUrl;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private Long createdBy;
+    private Long updatedBy;
 }
