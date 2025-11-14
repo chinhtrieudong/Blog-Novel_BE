@@ -362,10 +362,4 @@ public class NovelServiceImpl implements NovelService {
                         throw new AppException(ErrorCode.UPLOAD_FAILED);
                 }
         }
-
-        @Override
-        @Transactional
-        public void incrementViewCount(Long novelId) {
-                novelRepository.incrementViewCount(novelId);
-        }
 }

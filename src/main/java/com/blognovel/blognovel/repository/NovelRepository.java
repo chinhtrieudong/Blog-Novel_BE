@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -27,8 +26,4 @@ public interface NovelRepository extends JpaRepository<Novel, Long>, JpaSpecific
 
     @Query("SELECT n FROM Novel n WHERE n.author.name LIKE %:authorName%")
     Page<Novel> findByAuthorName(@Param("authorName") String authorName, Pageable pageable);
-
-    @Modifying
-    @Query("UPDATE Novel n SET n.viewCount = n.viewCount + 1 WHERE n.id = :novelId")
-    void incrementViewCount(@Param("novelId") Long novelId);
 }

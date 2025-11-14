@@ -25,9 +25,6 @@ public class Chapter extends BaseEntity {
     @Builder.Default
     private Long viewCount = 0L;
 
-    @Builder.Default
-    private Long wordCount = 0L;
-
     @ManyToOne
     @JoinColumn(name = "novel_id", nullable = false)
     private Novel novel;

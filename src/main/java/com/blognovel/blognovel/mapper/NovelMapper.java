@@ -35,8 +35,6 @@ public abstract class NovelMapper {
     @Mapping(target = "title", expression = "java(processTitle(novel.getTitle()))")
     @Mapping(target = "description", expression = "java(processDescription(novel.getDescription()))")
     @Mapping(target = "coverImage", expression = "java(processCoverImage(novel.getCoverImage()))")
-    @Mapping(target = "totalViews", source = "viewCount")
-    @Mapping(target = "totalChapters", expression = "java(novel.getChapters() != null ? (long) novel.getChapters().size() : 0L)")
     public abstract NovelResponse toResponse(Novel novel);
 
     @Mapping(target = "slug", expression = "java(generateSlug(novelRequest.getTitle()))")

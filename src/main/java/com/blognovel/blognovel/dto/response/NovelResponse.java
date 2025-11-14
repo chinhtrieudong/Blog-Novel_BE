@@ -4,7 +4,6 @@ import com.blognovel.blognovel.enums.NovelStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -17,12 +16,7 @@ public class NovelResponse {
     private String coverImage;
     private AuthorResponse author;
     private NovelStatus status;
-    private Long totalViews;
-    private Long totalChapters;
+    private Long viewCount;
     private Float avgRating;
     private Set<GenreResponse> genres;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private Long createdBy;
-    private Long updatedBy;
 }

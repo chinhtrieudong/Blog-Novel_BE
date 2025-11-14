@@ -25,6 +25,4 @@ public class PostResponse {
     private Set<TagResponse> tags;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long createdBy;
-    private Long updatedBy;
 }

@@ -33,8 +33,7 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public ChapterResponse getChapterById(Long novelId, Long chapterId) {
         Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Chapter not found with id " + chapterId + " and novelId " + novelId));
+                .orElseThrow(() -> new EntityNotFoundException("Chapter not found with id " + chapterId + " and novelId " + novelId));
         return chapterMapper.chapterToChapterResponse(chapter);
     }
 
@@ -49,7 +48,6 @@ public class ChapterServiceImpl implements ChapterService {
                 .chapterNumber(chapterRequest.getChapterNumber())
                 .novel(novel)
                 .viewCount(0L)
-                .wordCount(calculateWordCount(chapterRequest.getContent()))
                 .build();
 
         Chapter savedChapter = chapterRepository.save(chapter);
@@ -59,13 +57,11 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public ChapterResponse updateChapter(Long novelId, Long chapterId, ChapterRequest chapterRequest) {
         Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Chapter not found with id " + chapterId + " and novelId " + novelId));
+                .orElseThrow(() -> new EntityNotFoundException("Chapter not found with id " + chapterId + " and novelId " + novelId));
 
         chapter.setTitle(chapterRequest.getTitle());
         chapter.setContent(chapterRequest.getContent());
         chapter.setChapterNumber(chapterRequest.getChapterNumber());
-        chapter.setWordCount(calculateWordCount(chapterRequest.getContent()));
 
         Chapter updatedChapter = chapterRepository.save(chapter);
         return chapterMapper.chapterToChapterResponse(updatedChapter);
@@ -74,24 +70,15 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public void deleteChapter(Long novelId, Long chapterId) {
         Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Chapter not found with id " + chapterId + " and novelId " + novelId));
+                .orElseThrow(() -> new EntityNotFoundException("Chapter not found with id " + chapterId + " and novelId " + novelId));
         chapterRepository.delete(chapter);
     }
 
     @Override
     public void incrementViewCount(Long novelId, Long chapterId) {
         Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Chapter not found with id " + chapterId + " and novelId " + novelId));
+                .orElseThrow(() -> new EntityNotFoundException("Chapter not found with id " + chapterId + " and novelId " + novelId));
         chapter.setViewCount(chapter.getViewCount() + 1);
         chapterRepository.save(chapter);
-    }
-
-    private Long calculateWordCount(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return 0L;
-        }
-        return (long) content.trim().split("\\s+").length;
     }
 }
