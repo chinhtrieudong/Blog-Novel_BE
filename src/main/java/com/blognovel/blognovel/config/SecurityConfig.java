@@ -47,7 +47,10 @@ public class SecurityConfig {
                         "/v3/api-docs/**",
                         "/swagger-ui.html",
                         "/webjars/**",
-                        "/api/uploads/**"
+                        "/api/uploads/**",
+                        "/api/novels/*/views",
+                        "/api/novels/*/chapters/*/views",
+                        "/api/posts/*/views"
         };
 
         private static final String[] PUBLIC_GET_ENDPOINTS = {
