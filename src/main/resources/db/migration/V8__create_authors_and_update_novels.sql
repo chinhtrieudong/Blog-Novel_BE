@@ -11,11 +11,10 @@ CREATE TABLE authors
     CONSTRAINT fk_author_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
--- Update novels table to make slug NOT NULL and update foreign key
+-- Update novels table to make slug NOT NULL and drop old foreign key
 ALTER TABLE novels
     MODIFY slug VARCHAR(255) NOT NULL,
-    DROP FOREIGN KEY fk_novel_author,
-    ADD CONSTRAINT fk_novel_to_author FOREIGN KEY (author_id) REFERENCES authors (id);
+    DROP FOREIGN KEY fk_novel_author;
 
 -- Insert some default authors for existing novels
 INSERT INTO authors (name, bio, created_at, updated_at)
@@ -38,6 +37,10 @@ SET author_id = (
         'Unknown Author'
     )
 );
+
+-- Add new foreign key after updating the data
+ALTER TABLE novels
+    ADD CONSTRAINT fk_novel_to_author FOREIGN KEY (author_id) REFERENCES authors (id);
 
 -- Generate slugs for existing novels that don't have them
 UPDATE novels
