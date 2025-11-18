@@ -1,28 +1,35 @@
 package com.blognovel.blognovel.service.util;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
 public class RefreshTokenService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    @Autowired(required = false)
+    private RedisTemplate<String, Object> redisTemplate;
     private static final String REFRESH_PREFIX = "refresh:";
 
     public void saveRefreshToken(String username, String refreshToken, long expirationDays) {
-        String key = REFRESH_PREFIX + username;
-        redisTemplate.opsForValue().set(key, refreshToken, expirationDays, TimeUnit.DAYS);
+        if (redisTemplate != null) {
+            String key = REFRESH_PREFIX + username;
+            redisTemplate.opsForValue().set(key, refreshToken, expirationDays, TimeUnit.DAYS);
+        }
     }
 
     public String getRefreshToken(String username) {
+        if (redisTemplate == null) {
+            return null;
+        }
         return (String) redisTemplate.opsForValue().get(REFRESH_PREFIX + username);
     }
 
     public void deleteRefreshToken(String username) {
-        redisTemplate.delete(REFRESH_PREFIX + username);
+        if (redisTemplate != null) {
+            redisTemplate.delete(REFRESH_PREFIX + username);
+        }
     }
 }
