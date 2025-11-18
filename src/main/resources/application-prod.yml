@@ -34,8 +34,6 @@ spring:
       timeout: 20s
       lettuce:
         shutdown-timeout: 100ms
-      ssl:
-        enabled: true
 
 logging:
   level:
