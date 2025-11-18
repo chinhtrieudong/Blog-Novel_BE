@@ -19,4 +19,5 @@ public class NovelResponse {
     private Long viewCount;
     private Float avgRating;
     private Set<GenreResponse> genres;
+    private Integer totalChapters;
 }

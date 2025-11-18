@@ -13,6 +13,7 @@ import com.blognovel.blognovel.model.NovelFavorite;
 import com.blognovel.blognovel.model.NovelLike;
 import com.blognovel.blognovel.model.NovelRating;
 import com.blognovel.blognovel.model.User;
+import com.blognovel.blognovel.repository.ChapterRepository;
 import com.blognovel.blognovel.repository.GenreRepository;
 import com.blognovel.blognovel.repository.NovelFavoriteRepository;
 import com.blognovel.blognovel.repository.NovelLikeRepository;
@@ -43,6 +44,7 @@ public class NovelServiceImpl implements NovelService {
         private final NovelRepository novelRepository;
         private final UserRepository userRepository;
         private final GenreRepository genreRepository;
+        private final ChapterRepository chapterRepository;
         private final NovelLikeRepository novelLikeRepository;
         private final NovelFavoriteRepository novelFavoriteRepository;
         private final NovelRatingRepository novelRatingRepository;
@@ -59,6 +61,7 @@ public class NovelServiceImpl implements NovelService {
                         List<NovelResponse> novelResponses = novels.getContent().stream()
                                         .map(novelMapper::toResponse)
                                         .collect(Collectors.toList());
+                        setTotalChapters(novelResponses);
 
                         return PagedResponse.<NovelResponse>builder()
                                         .content(novelResponses)
@@ -87,6 +90,7 @@ public class NovelServiceImpl implements NovelService {
                 List<NovelResponse> novelResponses = novels.getContent().stream()
                                 .map(novelMapper::toResponse)
                                 .collect(Collectors.toList());
+                setTotalChapters(novelResponses);
 
                 return PagedResponse.<NovelResponse>builder()
                                 .content(novelResponses)
@@ -104,6 +108,7 @@ public class NovelServiceImpl implements NovelService {
                 List<NovelResponse> novelResponses = novels.getContent().stream()
                                 .map(novelMapper::toResponse)
                                 .collect(Collectors.toList());
+                setTotalChapters(novelResponses);
 
                 return PagedResponse.<NovelResponse>builder()
                                 .content(novelResponses)
@@ -121,6 +126,7 @@ public class NovelServiceImpl implements NovelService {
                 List<NovelResponse> novelResponses = novels.getContent().stream()
                                 .map(novelMapper::toResponse)
                                 .collect(Collectors.toList());
+                setTotalChapters(novelResponses);
 
                 return PagedResponse.<NovelResponse>builder()
                                 .content(novelResponses)
@@ -138,6 +144,7 @@ public class NovelServiceImpl implements NovelService {
                 List<NovelResponse> novelResponses = novels.getContent().stream()
                                 .map(novelMapper::toResponse)
                                 .collect(Collectors.toList());
+                setTotalChapters(novelResponses);
 
                 return PagedResponse.<NovelResponse>builder()
                                 .content(novelResponses)
@@ -153,7 +160,9 @@ public class NovelServiceImpl implements NovelService {
         public NovelResponse getNovelById(Long id) {
                 Novel novel = novelRepository.findById(id)
                                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
-                return novelMapper.toResponse(novel);
+                NovelResponse response = novelMapper.toResponse(novel);
+                response.setTotalChapters((int) chapterRepository.countByNovelId(id));
+                return response;
         }
 
         @Override
@@ -177,6 +186,7 @@ public class NovelServiceImpl implements NovelService {
                 List<NovelResponse> novelResponses = relatedNovels.getContent().stream()
                                 .map(novelMapper::toResponse)
                                 .collect(Collectors.toList());
+                setTotalChapters(novelResponses);
 
                 return PagedResponse.<NovelResponse>builder()
                                 .content(novelResponses)
@@ -225,7 +235,9 @@ public class NovelServiceImpl implements NovelService {
                 System.out.println("Novel saved with ID: " + savedNovel.getId());
                 System.out.println("=== END DEBUG ===");
 
-                return novelMapper.toResponse(savedNovel);
+                NovelResponse response = novelMapper.toResponse(savedNovel);
+                response.setTotalChapters(0); // New novel has no chapters yet
+                return response;
         }
 
         @Override
@@ -239,7 +251,9 @@ public class NovelServiceImpl implements NovelService {
 
                 // Remove manual updatedAt setting - let @UpdateTimestamp handle it
                 Novel updatedNovel = novelRepository.save(novel);
-                return novelMapper.toResponse(updatedNovel);
+                NovelResponse response = novelMapper.toResponse(updatedNovel);
+                response.setTotalChapters((int) chapterRepository.countByNovelId(id));
+                return response;
         }
 
         @Override
@@ -355,11 +369,24 @@ public class NovelServiceImpl implements NovelService {
                         novel.setStatus(newStatus);
 
                         Novel updatedNovel = novelRepository.save(novel);
-                        return novelMapper.toResponse(updatedNovel);
+                        NovelResponse response = novelMapper.toResponse(updatedNovel);
+                        response.setTotalChapters((int) chapterRepository.countByNovelId(id));
+                        return response;
                 } catch (IllegalArgumentException e) {
                         throw new AppException(ErrorCode.INVALID_STATUS);
                 } catch (Exception e) {
                         throw new AppException(ErrorCode.UPLOAD_FAILED);
                 }
+        }
+
+        private void setTotalChapters(List<NovelResponse> responses) {
+                for (NovelResponse response : responses) {
+                        response.setTotalChapters((int) chapterRepository.countByNovelId(response.getId()));
+                }
+        }
+
+        private NovelResponse setTotalChapters(NovelResponse response) {
+                response.setTotalChapters((int) chapterRepository.countByNovelId(response.getId()));
+                return response;
         }
 }

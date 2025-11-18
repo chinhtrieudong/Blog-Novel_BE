@@ -51,7 +51,7 @@ services:
       MYSQLPASSWORD: blogpass
       REDISHOST: redis
       REDISPORT: 6379
-      CLOUDINARY_URL: cloudinary://dummy:dummy@dummy
+      CLOUDINARY_URL: ddoesja29CLOUDINARY_URL=cloudinary://891526691911467:TnwTqA61t4ZiVvnWt8h0iQVZnII@ddoesja29
     ports:
       - "8080:8080"
     healthcheck:
