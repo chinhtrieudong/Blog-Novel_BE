@@ -10,7 +10,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @EnableCaching
-@Profile("!prod")
 public class RedisConfig {
 
     @Bean
