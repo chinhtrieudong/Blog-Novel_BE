@@ -31,12 +31,24 @@ spring:
   data:
     redis:
       url: ${REDIS_URL:redis://localhost:6379}
+      timeout: 20s
+      lettuce:
+        shutdown-timeout: 100ms
+      ssl:
+        enabled: ${REDIS_SSL:false}
 
 logging:
   level:
     root: INFO
     org.springframework.web: WARN
     org.hibernate.SQL: WARN
+    org.springframework.security: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
 
 springdoc:
   api-docs:
