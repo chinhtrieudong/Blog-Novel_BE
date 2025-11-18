@@ -15,7 +15,7 @@ CREATE TABLE authors
 ALTER TABLE novels
     MODIFY slug VARCHAR(255) NOT NULL,
     DROP FOREIGN KEY fk_novel_author,
-    ADD CONSTRAINT fk_novel_author FOREIGN KEY (author_id) REFERENCES authors (id);
+    ADD CONSTRAINT fk_novel_to_author FOREIGN KEY (author_id) REFERENCES authors (id);
 
 -- Insert some default authors for existing novels
 INSERT INTO authors (name, bio, created_at, updated_at)
