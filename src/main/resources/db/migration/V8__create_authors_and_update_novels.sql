@@ -11,6 +11,10 @@ CREATE TABLE authors
     CONSTRAINT fk_author_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
+-- Allow author_id to be NULL temporarily for update
+ALTER TABLE novels
+    MODIFY author_id BIGINT NULL;
+
 -- Update novels table to make slug NOT NULL and drop old foreign key
 ALTER TABLE novels
     MODIFY slug VARCHAR(255) NOT NULL,
