@@ -14,7 +14,7 @@ CREATE TABLE authors
 -- Update novels table to make slug NOT NULL and update foreign key
 ALTER TABLE novels
     MODIFY slug VARCHAR(255) NOT NULL,
-    DROP FOREIGN KEY IF EXISTS fk_novel_author,
+    DROP FOREIGN KEY fk_novel_author,
     ADD CONSTRAINT fk_novel_author FOREIGN KEY (author_id) REFERENCES authors (id);
 
 -- Insert some default authors for existing novels
