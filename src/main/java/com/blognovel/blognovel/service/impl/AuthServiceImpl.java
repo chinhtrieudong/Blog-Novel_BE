@@ -17,6 +17,7 @@ import com.blognovel.blognovel.repository.UserRepository;
 import com.blognovel.blognovel.service.AuthService;
 import com.blognovel.blognovel.service.util.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,9 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService blacklistService;
-    private final RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired(required = false)
+    private RedisTemplate<String, Object> redisTemplate;
     private static final String RESET_PREFIX = "reset:";
 
     public UserResponse register(AuthRequest request) {
@@ -82,15 +85,20 @@ public class AuthServiceImpl implements AuthService {
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        if (user != null) {
+        if (user != null && redisTemplate != null) {
             String token = UUID.randomUUID().toString();
             redisTemplate.opsForValue().set(RESET_PREFIX + token, user.getUsername(), 15, TimeUnit.MINUTES);
             // TODO: Implement email service to send reset password link
         }
+        // If user exists but redisTemplate is null, we skip the token storage
+        // The email would not be sent anyway since no email service
     }
 
     @Override
     public void resetPassword(ResetPasswordRequest request) {
+        if (redisTemplate == null) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
         String username = (String) redisTemplate.opsForValue().get(RESET_PREFIX + request.getToken());
         if (username == null) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
