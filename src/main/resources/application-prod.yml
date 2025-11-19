@@ -28,12 +28,12 @@ spring:
     user: ${MYSQLUSER:bloguser}
     password: ${MYSQLPASSWORD:blogpass}
 
-  data:
-    redis:
-      url: ${REDIS_URL:redis://localhost:6379}
-      timeout: 20s
-      lettuce:
-        shutdown-timeout: 100ms
+  # data:
+  #   redis:
+  #     url: ${REDIS_URL:redis://localhost:6379}
+  #     timeout: 20s
+  #     lettuce:
+  #       shutdown-timeout: 100ms
 
 logging:
   level:

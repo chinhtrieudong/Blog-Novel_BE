@@ -27,8 +27,7 @@ spring:
 
   data:
     redis:
-      host: ${REDISHOST:localhost}
-      port: ${REDISPORT:6379}
+      url: ${REDIS_URL:rediss://default:AZeNAAIncDI2YWE5YTMzODU3ZTk0N2JmOTQxMzhkZDI2NDI4MDg5YXAyMzg3OTc@apparent-moose-38797.upstash.io:6379}
 
 logging:
   level:
