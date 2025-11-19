@@ -16,6 +16,7 @@ import com.blognovel.blognovel.model.User;
 import com.blognovel.blognovel.repository.UserRepository;
 import com.blognovel.blognovel.service.AuthService;
 import com.blognovel.blognovel.service.util.TokenBlacklistService;
+import com.blognovel.blognovel.service.util.UpstashRedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -35,6 +36,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired(required = false)
+    private UpstashRedisService upstashRedisService;
+
     private static final String RESET_PREFIX = "reset:";
 
     public UserResponse register(AuthRequest request) {
@@ -85,21 +90,35 @@ public class AuthServiceImpl implements AuthService {
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        if (user != null && redisTemplate != null) {
+        if (user != null) {
             String token = UUID.randomUUID().toString();
-            redisTemplate.opsForValue().set(RESET_PREFIX + token, user.getUsername(), 15, TimeUnit.MINUTES);
+            if (upstashRedisService != null) {
+                try {
+                    upstashRedisService.set(RESET_PREFIX + token, user.getUsername(), 15 * 60); // 15 minutes in seconds
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if (redisTemplate != null) {
+                redisTemplate.opsForValue().set(RESET_PREFIX + token, user.getUsername(), 15, TimeUnit.MINUTES);
+            }
             // TODO: Implement email service to send reset password link
         }
-        // If user exists but redisTemplate is null, we skip the token storage
-        // The email would not be sent anyway since no email service
     }
 
     @Override
     public void resetPassword(ResetPasswordRequest request) {
-        if (redisTemplate == null) {
+        String username = null;
+        if (upstashRedisService != null) {
+            try {
+                username = upstashRedisService.get(RESET_PREFIX + request.getToken());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (redisTemplate != null) {
+            username = (String) redisTemplate.opsForValue().get(RESET_PREFIX + request.getToken());
+        } else {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
-        String username = (String) redisTemplate.opsForValue().get(RESET_PREFIX + request.getToken());
         if (username == null) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
@@ -107,7 +126,15 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        redisTemplate.delete(RESET_PREFIX + request.getToken());
+        if (upstashRedisService != null) {
+            try {
+                upstashRedisService.delete(RESET_PREFIX + request.getToken());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (redisTemplate != null) {
+            redisTemplate.delete(RESET_PREFIX + request.getToken());
+        }
     }
 
     @Override

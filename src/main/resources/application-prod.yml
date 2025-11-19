@@ -35,6 +35,10 @@ spring:
       ssl:
         enabled: true
 
+  redis:
+    enabled: ${REDIS_ENABLED:true}
+    rest: ${REDIS_REST:false}
+
 logging:
   level:
     root: INFO
