@@ -50,6 +50,10 @@ public class AuthorServiceImpl implements AuthorService {
                 .avatarUrl(uploadImage(request.getAvatarImage()))
                 .build();
 
+        // Set audit fields (no current user available, set to null)
+        author.setCreatedBy(null);
+        author.setUpdatedBy(null);
+
         Author savedAuthor = authorRepository.save(author);
         return authorMapper.toResponse(savedAuthor);
     }

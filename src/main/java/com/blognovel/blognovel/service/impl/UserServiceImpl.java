@@ -47,6 +47,24 @@ public class UserServiceImpl implements UserService {
         user.setBio(request.getBio() != null ? request.getBio() : user.getBio());
         user.setAvatarUrl(request.getAvatarUrl() != null ? request.getAvatarUrl() : user.getAvatarUrl());
 
+        // Update role
+        if (request.getRole() != null && !request.getRole().isEmpty()) {
+            try {
+                user.setRole(Role.valueOf(request.getRole().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new AppException(ErrorCode.INVALID_ROLE);
+            }
+        }
+
+        // Update status
+        if (request.getStatus() != null && !request.getStatus().isEmpty()) {
+            try {
+                user.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new AppException(ErrorCode.INVALID_STATUS);
+            }
+        }
+
         return userMapper.toResponse(userRepository.save(user));
     }
 

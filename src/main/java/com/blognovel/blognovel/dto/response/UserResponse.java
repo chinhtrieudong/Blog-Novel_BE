@@ -2,6 +2,8 @@ package com.blognovel.blognovel.dto.response;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,6 +18,8 @@ public class UserResponse {
     private String avatarUrl;
     private String role;
     private String status;
-    private String createdAt;
-    private String updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private Long createdBy;
+    private Long updatedBy;
 }

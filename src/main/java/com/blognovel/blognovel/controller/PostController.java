@@ -119,7 +119,7 @@ public class PostController {
                                 .build();
         }
 
-        @PatchMapping("/{id}/status")
+        @PutMapping("/{id}/status")
         @Operation(summary = "Update post status", description = "Updates the status of a specific post. Requires authentication.")
         public ApiResponse<PostResponse> updatePostStatus(
                         @Parameter(description = "Post ID") @PathVariable Long id,

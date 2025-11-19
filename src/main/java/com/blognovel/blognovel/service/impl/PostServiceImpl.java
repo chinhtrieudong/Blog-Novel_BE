@@ -141,6 +141,10 @@ public class PostServiceImpl implements PostService {
                 String slug = SlugGenerator.makeSlug(request.getTitle());
                 post.setSlug(slug);
 
+                // Set audit fields
+                post.setCreatedBy(authorId);
+                post.setUpdatedBy(authorId);
+
                 if (request.getCoverImage() != null && !request.getCoverImage().isEmpty()) {
                         try {
                                 String imageUrl = cloudinaryService.uploadImage(request.getCoverImage());
@@ -214,13 +218,11 @@ public class PostServiceImpl implements PostService {
                 try {
                         PostStatus newStatus = PostStatus.valueOf(status.toUpperCase());
                         post.setStatus(newStatus);
-
-                        Post updatedPost = postRepository.save(post);
-                        return postMapper.toResponse(updatedPost);
                 } catch (IllegalArgumentException e) {
                         throw new AppException(ErrorCode.INVALID_STATUS);
-                } catch (Exception e) {
-                        throw new AppException(ErrorCode.UPLOAD_FAILED);
                 }
+
+                Post updatedPost = postRepository.save(post);
+                return postMapper.toResponse(updatedPost);
         }
 }

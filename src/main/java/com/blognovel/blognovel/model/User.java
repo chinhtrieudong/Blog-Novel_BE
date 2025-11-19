@@ -37,7 +37,7 @@ public class User extends BaseEntity {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USER;
+    private Role role = Role.READER;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

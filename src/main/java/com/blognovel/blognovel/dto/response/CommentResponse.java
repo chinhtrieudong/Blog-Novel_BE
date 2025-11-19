@@ -18,6 +18,8 @@ public class CommentResponse {
     private UserResponse user;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long createdBy;
+    private Long updatedBy;
     private Long likeCount;
     private List<CommentResponse> replies;
 }

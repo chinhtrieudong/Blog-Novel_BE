@@ -27,4 +27,8 @@ public class UserRequest {
     private String bio;
 
     private String avatarUrl;
+
+    private String role;
+
+    private String status;
 }
