@@ -389,4 +389,12 @@ public class NovelServiceImpl implements NovelService {
                 response.setTotalChapters((int) chapterRepository.countByNovelId(response.getId()));
                 return response;
         }
+
+        @Override
+        public void incrementViewCount(Long novelId) {
+                Novel novel = novelRepository.findById(novelId)
+                                .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
+                novel.setViewCount(novel.getViewCount() + 1);
+                novelRepository.save(novel);
+        }
 }

@@ -4,6 +4,7 @@ import com.blognovel.blognovel.dto.request.ChapterRequest;
 import com.blognovel.blognovel.dto.response.ApiResponse;
 import com.blognovel.blognovel.dto.response.ChapterResponse;
 import com.blognovel.blognovel.service.ChapterService;
+import com.blognovel.blognovel.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -19,6 +21,7 @@ import java.util.List;
 public class ChapterController {
 
         private final ChapterService chapterService;
+        private final UserService userService;
 
         @GetMapping
         @Operation(summary = "Get all chapters for a novel")
@@ -50,9 +53,11 @@ public class ChapterController {
         @ResponseStatus(HttpStatus.CREATED) // Use ResponseStatus to set the status code
         public ApiResponse<ChapterResponse> createChapter(
                         @Parameter(description = "Novel ID") @PathVariable Long novelId,
-                        @Valid @RequestBody ChapterRequest chapterRequest) {
+                        @Valid @RequestBody ChapterRequest chapterRequest,
+                        Principal principal) {
                 // TODO: Add Admin Role check here
-                ChapterResponse chapter = chapterService.createChapter(novelId, chapterRequest);
+                Long userId = userService.getCurrentUser(principal.getName()).getId();
+                ChapterResponse chapter = chapterService.createChapter(novelId, chapterRequest, userId);
                 return ApiResponse.<ChapterResponse>builder()
                                 .code(201) // Code is already implied by ResponseStatus, but keep it for consistency
                                 .message("Chapter created successfully")
@@ -65,9 +70,11 @@ public class ChapterController {
         public ApiResponse<ChapterResponse> updateChapter(
                         @Parameter(description = "Novel ID") @PathVariable Long novelId,
                         @Parameter(description = "Chapter ID") @PathVariable Long chapterId,
-                        @Valid @RequestBody ChapterRequest chapterRequest) {
+                        @Valid @RequestBody ChapterRequest chapterRequest,
+                        Principal principal) {
                 // TODO: Add Admin Role check here
-                ChapterResponse chapter = chapterService.updateChapter(novelId, chapterId, chapterRequest);
+                Long userId = userService.getCurrentUser(principal.getName()).getId();
+                ChapterResponse chapter = chapterService.updateChapter(novelId, chapterId, chapterRequest, userId);
                 return ApiResponse.<ChapterResponse>builder()
                                 .code(200)
                                 .message("Chapter updated successfully")

@@ -10,6 +10,7 @@ public class ChapterResponse {
     private String title;
     private String content;
     private Integer chapterNumber;
+    private Long viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long createdBy;

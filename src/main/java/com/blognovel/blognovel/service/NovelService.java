@@ -35,4 +35,6 @@ public interface NovelService {
     void rateNovel(Long id, int rating, Long userId);
 
     NovelResponse updateNovelStatus(Long id, String status);
+
+    void incrementViewCount(Long novelId);
 }

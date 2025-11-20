@@ -7,9 +7,14 @@ import java.util.List;
 
 public interface ChapterService {
     List<ChapterResponse> getAllChaptersByNovelId(Long novelId);
+
     ChapterResponse getChapterById(Long novelId, Long chapterId);
-    ChapterResponse createChapter(Long novelId, ChapterRequest chapterRequest);
-    ChapterResponse updateChapter(Long novelId, Long chapterId, ChapterRequest chapterRequest);
+
+    ChapterResponse createChapter(Long novelId, ChapterRequest chapterRequest, Long userId);
+
+    ChapterResponse updateChapter(Long novelId, Long chapterId, ChapterRequest chapterRequest, Long userId);
+
     void deleteChapter(Long novelId, Long chapterId);
+
     void incrementViewCount(Long novelId, Long chapterId);
 }

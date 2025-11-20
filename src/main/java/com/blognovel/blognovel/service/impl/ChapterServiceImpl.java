@@ -19,66 +19,74 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChapterServiceImpl implements ChapterService {
 
-    private final ChapterRepository chapterRepository;
-    private final NovelRepository novelRepository;
-    private final ChapterMapper chapterMapper;
+        private final ChapterRepository chapterRepository;
+        private final NovelRepository novelRepository;
+        private final ChapterMapper chapterMapper;
 
-    @Override
-    public List<ChapterResponse> getAllChaptersByNovelId(Long novelId) {
-        return chapterRepository.findByNovelId(novelId).stream()
-                .map(chapterMapper::chapterToChapterResponse)
-                .collect(Collectors.toList());
-    }
+        @Override
+        public List<ChapterResponse> getAllChaptersByNovelId(Long novelId) {
+                return chapterRepository.findByNovelId(novelId).stream()
+                                .map(chapterMapper::chapterToChapterResponse)
+                                .collect(Collectors.toList());
+        }
 
-    @Override
-    public ChapterResponse getChapterById(Long novelId, Long chapterId) {
-        Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
-                .orElseThrow(() -> new EntityNotFoundException("Chapter not found with id " + chapterId + " and novelId " + novelId));
-        return chapterMapper.chapterToChapterResponse(chapter);
-    }
+        @Override
+        public ChapterResponse getChapterById(Long novelId, Long chapterId) {
+                Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
+                                .orElseThrow(() -> new EntityNotFoundException(
+                                                "Chapter not found with id " + chapterId + " and novelId " + novelId));
+                return chapterMapper.chapterToChapterResponse(chapter);
+        }
 
-    @Override
-    public ChapterResponse createChapter(Long novelId, ChapterRequest chapterRequest) {
-        Novel novel = novelRepository.findById(novelId)
-                .orElseThrow(() -> new EntityNotFoundException("Novel not found with id " + novelId));
+        @Override
+        public ChapterResponse createChapter(Long novelId, ChapterRequest chapterRequest, Long userId) {
+                Novel novel = novelRepository.findById(novelId)
+                                .orElseThrow(() -> new EntityNotFoundException("Novel not found with id " + novelId));
 
-        Chapter chapter = Chapter.builder()
-                .title(chapterRequest.getTitle())
-                .content(chapterRequest.getContent())
-                .chapterNumber(chapterRequest.getChapterNumber())
-                .novel(novel)
-                .viewCount(0L)
-                .build();
+                Chapter chapter = Chapter.builder()
+                                .title(chapterRequest.getTitle())
+                                .content(chapterRequest.getContent())
+                                .chapterNumber(chapterRequest.getChapterNumber())
+                                .novel(novel)
+                                .viewCount(0L)
+                                .build();
 
-        Chapter savedChapter = chapterRepository.save(chapter);
-        return chapterMapper.chapterToChapterResponse(savedChapter);
-    }
+                chapter.setCreatedBy(userId);
+                chapter.setUpdatedBy(userId);
 
-    @Override
-    public ChapterResponse updateChapter(Long novelId, Long chapterId, ChapterRequest chapterRequest) {
-        Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
-                .orElseThrow(() -> new EntityNotFoundException("Chapter not found with id " + chapterId + " and novelId " + novelId));
+                Chapter savedChapter = chapterRepository.save(chapter);
+                return chapterMapper.chapterToChapterResponse(savedChapter);
+        }
 
-        chapter.setTitle(chapterRequest.getTitle());
-        chapter.setContent(chapterRequest.getContent());
-        chapter.setChapterNumber(chapterRequest.getChapterNumber());
+        @Override
+        public ChapterResponse updateChapter(Long novelId, Long chapterId, ChapterRequest chapterRequest, Long userId) {
+                Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
+                                .orElseThrow(() -> new EntityNotFoundException(
+                                                "Chapter not found with id " + chapterId + " and novelId " + novelId));
 
-        Chapter updatedChapter = chapterRepository.save(chapter);
-        return chapterMapper.chapterToChapterResponse(updatedChapter);
-    }
+                chapter.setTitle(chapterRequest.getTitle());
+                chapter.setContent(chapterRequest.getContent());
+                chapter.setChapterNumber(chapterRequest.getChapterNumber());
+                chapter.setUpdatedBy(userId);
 
-    @Override
-    public void deleteChapter(Long novelId, Long chapterId) {
-        Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
-                .orElseThrow(() -> new EntityNotFoundException("Chapter not found with id " + chapterId + " and novelId " + novelId));
-        chapterRepository.delete(chapter);
-    }
+                Chapter updatedChapter = chapterRepository.save(chapter);
+                return chapterMapper.chapterToChapterResponse(updatedChapter);
+        }
 
-    @Override
-    public void incrementViewCount(Long novelId, Long chapterId) {
-        Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
-                .orElseThrow(() -> new EntityNotFoundException("Chapter not found with id " + chapterId + " and novelId " + novelId));
-        chapter.setViewCount(chapter.getViewCount() + 1);
-        chapterRepository.save(chapter);
-    }
+        @Override
+        public void deleteChapter(Long novelId, Long chapterId) {
+                Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
+                                .orElseThrow(() -> new EntityNotFoundException(
+                                                "Chapter not found with id " + chapterId + " and novelId " + novelId));
+                chapterRepository.delete(chapter);
+        }
+
+        @Override
+        public void incrementViewCount(Long novelId, Long chapterId) {
+                Chapter chapter = chapterRepository.findByIdAndNovelId(chapterId, novelId)
+                                .orElseThrow(() -> new EntityNotFoundException(
+                                                "Chapter not found with id " + chapterId + " and novelId " + novelId));
+                chapter.setViewCount(chapter.getViewCount() + 1);
+                chapterRepository.save(chapter);
+        }
 }
