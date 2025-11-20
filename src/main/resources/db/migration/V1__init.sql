@@ -8,7 +8,7 @@ CREATE TABLE users
     full_name  VARCHAR(100),
     bio        TEXT,
     avatar_url VARCHAR(255),
-    role       ENUM ('USER','ADMIN')    DEFAULT 'USER',
+    role       ENUM ('READER','AUTHOR','ADMIN')    DEFAULT 'READER',
     status     ENUM ('ACTIVE','BANNED') DEFAULT 'ACTIVE',
     created_at TIMESTAMP                DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
