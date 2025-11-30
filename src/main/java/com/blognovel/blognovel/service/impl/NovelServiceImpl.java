@@ -270,6 +270,15 @@ public class NovelServiceImpl implements NovelService {
                 Novel novel = novelRepository.findById(id)
                                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
 
+                // Validate that author exists
+                Author author = authorService.getAuthorById(novelRequest.getAuthorIds().get(0));
+
+                // Validate that genres exist
+                for (Long genreId : novelRequest.getGenreIds()) {
+                        genreRepository.findById(genreId)
+                                        .orElseThrow(() -> new AppException(ErrorCode.INVALID_REQUEST));
+                }
+
                 novelMapper.updateNovelFromDto(novelRequest, novel, cloudinaryService);
                 // Set audit field
                 novel.setUpdatedBy(currentUserId);
