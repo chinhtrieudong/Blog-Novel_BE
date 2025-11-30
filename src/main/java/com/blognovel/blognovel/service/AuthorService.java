@@ -20,4 +20,8 @@ public interface AuthorService {
     AuthorResponse updateAuthor(Long id, AuthorRequest request);
 
     void deleteAuthor(Long id);
+
+    void followAuthor(Long authorId, Long userId);
+
+    List<AuthorResponse> getFollowedAuthorsByUserId(Long userId);
 }

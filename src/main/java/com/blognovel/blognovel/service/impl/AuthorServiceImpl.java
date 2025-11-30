@@ -6,7 +6,11 @@ import com.blognovel.blognovel.exception.AppException;
 import com.blognovel.blognovel.exception.ErrorCode;
 import com.blognovel.blognovel.mapper.AuthorMapper;
 import com.blognovel.blognovel.model.Author;
+import com.blognovel.blognovel.model.AuthorFollow;
+import com.blognovel.blognovel.model.User;
+import com.blognovel.blognovel.repository.AuthorFollowRepository;
 import com.blognovel.blognovel.repository.AuthorRepository;
+import com.blognovel.blognovel.repository.UserRepository;
 import com.blognovel.blognovel.service.AuthorService;
 import com.blognovel.blognovel.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,8 @@ import java.util.stream.Collectors;
 public class AuthorServiceImpl implements AuthorService {
 
     private final AuthorRepository authorRepository;
+    private final AuthorFollowRepository authorFollowRepository;
+    private final UserRepository userRepository;
     private final AuthorMapper authorMapper;
     private final CloudinaryService cloudinaryService;
 
@@ -102,6 +108,37 @@ public class AuthorServiceImpl implements AuthorService {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
         authorRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void followAuthor(Long authorId, Long userId) {
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Check if user already follows this author
+        if (authorFollowRepository.existsByAuthorIdAndUserId(authorId, userId)) {
+            // Unfollow: remove the follow
+            AuthorFollow follow = authorFollowRepository.findByAuthorIdAndUserId(authorId, userId).orElseThrow();
+            authorFollowRepository.delete(follow);
+        } else {
+            // Follow: create new follow
+            AuthorFollow follow = AuthorFollow.builder()
+                    .author(author)
+                    .user(user)
+                    .build();
+            authorFollowRepository.save(follow);
+        }
+    }
+
+    @Override
+    public List<AuthorResponse> getFollowedAuthorsByUserId(Long userId) {
+        List<AuthorFollow> follows = authorFollowRepository.findByUserId(userId);
+        return follows.stream()
+                .map(follow -> authorMapper.toResponse(follow.getAuthor()))
+                .collect(Collectors.toList());
     }
 
     private String uploadImage(org.springframework.web.multipart.MultipartFile file) {
