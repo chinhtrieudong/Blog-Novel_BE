@@ -57,6 +57,7 @@ public class SecurityConfig {
                         "/api/posts/**",
                         "/api/novels/**",
                         "/api/search/**",
+                        "/api/comments/**",
                         "/api/posts/*/comments",
                         "/api/novels/*/comments",
                         "/api/novels/*/chapters/**",
