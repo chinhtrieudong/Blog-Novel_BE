@@ -132,6 +132,35 @@ public class PostController {
                                 .build();
         }
 
+        @PostMapping("/{id}/save")
+        @Operation(summary = "Save/unsave post", description = "Toggles save status for a post. If post is already saved by user, it will be unsaved. Requires authentication.")
+        public ApiResponse<Void> savePost(
+                        @Parameter(description = "Post ID") @PathVariable Long id,
+                        @Parameter(hidden = true) Principal principal) {
+                Long userId = getCurrentUserId(principal);
+                postService.savePost(id, userId);
+                return ApiResponse.<Void>builder()
+                                .code(200)
+                                .message("Post save status toggled successfully")
+                                .build();
+        }
+
+        @GetMapping("/saved")
+        @Operation(summary = "Get saved posts", description = "Retrieves a paginated list of posts saved by the current user. Requires authentication.")
+        public ApiResponse<PagedResponse<PostResponse>> getSavedPosts(
+                        @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size,
+                        @Parameter(hidden = true) Principal principal) {
+                Long userId = getCurrentUserId(principal);
+                Pageable pageable = PageRequest.of(page, size);
+                PagedResponse<PostResponse> savedPosts = postService.getSavedPostsByUser(userId, pageable);
+                return ApiResponse.<PagedResponse<PostResponse>>builder()
+                                .code(200)
+                                .message("Saved posts retrieved successfully")
+                                .data(savedPosts)
+                                .build();
+        }
+
         private Long getCurrentUserId(Principal principal) {
                 String username = principal.getName();
                 User user = userRepository.findByUsername(username)

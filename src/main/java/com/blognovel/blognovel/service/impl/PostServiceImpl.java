@@ -9,7 +9,9 @@ import com.blognovel.blognovel.enums.PostStatus;
 import com.blognovel.blognovel.exception.AppException;
 import com.blognovel.blognovel.exception.ErrorCode;
 import com.blognovel.blognovel.mapper.PostMapper;
+import com.blognovel.blognovel.model.PostSave;
 import com.blognovel.blognovel.repository.PostRepository;
+import com.blognovel.blognovel.repository.PostSaveRepository;
 import com.blognovel.blognovel.repository.CategoryRepository;
 import com.blognovel.blognovel.repository.TagRepository;
 import com.blognovel.blognovel.repository.UserRepository;
@@ -40,6 +42,7 @@ import com.blognovel.blognovel.model.*;
 public class PostServiceImpl implements PostService {
 
         private final PostRepository postRepository;
+        private final PostSaveRepository postSaveRepository;
         private final CategoryRepository categoryRepository;
         private final TagRepository tagRepository;
         private final UserRepository userRepository;
@@ -224,5 +227,45 @@ public class PostServiceImpl implements PostService {
 
                 Post updatedPost = postRepository.save(post);
                 return postMapper.toResponse(updatedPost);
+        }
+
+        @Override
+        @Transactional
+        public void savePost(Long postId, Long userId) {
+                Post post = postRepository.findById(postId)
+                                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+                User user = userRepository.findById(userId)
+                                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+                // Check if user already saved this post
+                if (postSaveRepository.existsByPostIdAndUserId(postId, userId)) {
+                        // Unsave: remove the save
+                        PostSave save = postSaveRepository.findByPostIdAndUserId(postId, userId).orElseThrow();
+                        postSaveRepository.delete(save);
+                } else {
+                        // Save: create new save
+                        PostSave save = PostSave.builder()
+                                        .post(post)
+                                        .user(user)
+                                        .build();
+                        postSaveRepository.save(save);
+                }
+        }
+
+        @Override
+        public PagedResponse<PostResponse> getSavedPostsByUser(Long userId, Pageable pageable) {
+                Page<Post> posts = postSaveRepository.findSavedPostsByUserId(userId, pageable);
+                List<PostResponse> postResponses = posts.getContent().stream()
+                                .map(postMapper::toResponse)
+                                .collect(Collectors.toList());
+
+                return PagedResponse.<PostResponse>builder()
+                                .content(postResponses)
+                                .page(posts.getNumber())
+                                .size(posts.getSize())
+                                .totalElements(posts.getTotalElements())
+                                .totalPages(posts.getTotalPages())
+                                .last(posts.isLast())
+                                .build();
         }
 }

@@ -22,4 +22,8 @@ public interface PostService {
     void incrementViewCount(Long postId);
 
     PostResponse updatePostStatus(Long id, String status);
+
+    void savePost(Long postId, Long userId);
+
+    PagedResponse<PostResponse> getSavedPostsByUser(Long userId, Pageable pageable);
 }
