@@ -4,6 +4,8 @@ import com.blognovel.blognovel.dto.request.NovelRequest;
 import com.blognovel.blognovel.dto.response.ApiResponse;
 import com.blognovel.blognovel.dto.response.NovelResponse;
 import com.blognovel.blognovel.dto.response.PagedResponse;
+import com.blognovel.blognovel.dto.response.SavedNovelsResponse;
+import com.blognovel.blognovel.dto.response.UserReadingProgressResponse;
 import com.blognovel.blognovel.service.NovelService;
 import com.blognovel.blognovel.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -76,9 +78,15 @@ public class NovelController {
         }
 
         @GetMapping("/{id}")
-        @Operation(summary = "Get novel by ID", description = "Retrieves a novel by its unique identifier.")
-        public ApiResponse<NovelResponse> getNovelById(@Parameter(description = "Novel ID") @PathVariable Long id) {
-                NovelResponse novel = novelService.getNovelById(id);
+        @Operation(summary = "Get novel by ID", description = "Retrieves a novel by its unique identifier with reading progress for authenticated users.")
+        public ApiResponse<NovelResponse> getNovelById(
+                        @Parameter(description = "Novel ID") @PathVariable Long id,
+                        Principal principal) {
+                Long userId = null;
+                if (principal != null) {
+                        userId = userService.getCurrentUser(principal.getName()).getId();
+                }
+                NovelResponse novel = novelService.getNovelById(id, userId);
                 return ApiResponse.<NovelResponse>builder()
                                 .code(200)
                                 .message("Novel retrieved successfully")
@@ -156,17 +164,32 @@ public class NovelController {
                                 .build();
         }
 
-        @PostMapping("/{id}/favorite")
-        @Operation(summary = "Favorite a novel", description = "Adds a novel to the user's favorites.")
-        public ApiResponse<Void> favoriteNovel(@Parameter(description = "Novel ID") @PathVariable Long id,
+        @PostMapping("/{id}/save")
+        @Operation(summary = "Save/unsave a novel", description = "Toggles save status for a novel. If novel is already saved by user, it will be unsaved. Requires authentication.")
+        public ApiResponse<Void> saveNovel(@Parameter(description = "Novel ID") @PathVariable Long id,
                         Principal principal) {
                 Long userId = userService.getCurrentUser(principal.getName()).getId();
-                novelService.favoriteNovel(id, userId);
+                novelService.saveNovel(id, userId);
                 return ApiResponse.<Void>builder()
                                 .code(200)
-                                .message("Novel favorited successfully")
+                                .message("Novel save status toggled successfully")
                                 .build();
         }
+
+        // Commented out as per user request
+        // @PostMapping("/{id}/favorite")
+        // @Operation(summary = "Favorite a novel", description = "Adds a novel to the
+        // user's favorites.")
+        // public ApiResponse<Void> favoriteNovel(@Parameter(description = "Novel ID")
+        // @PathVariable Long id,
+        // Principal principal) {
+        // Long userId = userService.getCurrentUser(principal.getName()).getId();
+        // novelService.favoriteNovel(id, userId);
+        // return ApiResponse.<Void>builder()
+        // .code(200)
+        // .message("Novel favorited successfully")
+        // .build();
+        // }
 
         @GetMapping("/genres")
         @Operation(summary = "Get all genres", description = "Retrieves a list of all available genres.")
@@ -202,6 +225,62 @@ public class NovelController {
                                 .code(200)
                                 .message("Novel status updated successfully")
                                 .data(updatedNovel)
+                                .build();
+        }
+
+        @GetMapping("/favorites")
+        @Operation(summary = "Get user's favorite novels", description = "Retrieves a paginated list of novels favorited by the currently logged-in user.")
+        public ApiResponse<PagedResponse<NovelResponse>> getUserFavoriteNovels(
+                        @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size,
+                        Principal principal) {
+                Long userId = userService.getCurrentUser(principal.getName()).getId();
+                Pageable pageable = PageRequest.of(page, size);
+                PagedResponse<NovelResponse> favorites = novelService.getUserFavoriteNovels(userId, pageable);
+                return ApiResponse.<PagedResponse<NovelResponse>>builder()
+                                .code(200)
+                                .message("User favorite novels retrieved successfully")
+                                .data(favorites)
+                                .build();
+        }
+
+        @GetMapping("/saved")
+        @Operation(summary = "Get user's saved novels", description = "Retrieves a paginated list of novels saved by the currently logged-in user for reading later.")
+        public ApiResponse<SavedNovelsResponse> getUserSavedNovels(
+                        @Parameter(description = "Page number (default is 0)") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Page size (default is 10)") @RequestParam(defaultValue = "10") int size,
+                        Principal principal) {
+                Long userId = userService.getCurrentUser(principal.getName()).getId();
+                Pageable pageable = PageRequest.of(page, size);
+                SavedNovelsResponse saved = novelService.getSavedNovelsByUserWithStats(userId, pageable);
+                return ApiResponse.<SavedNovelsResponse>builder()
+                                .code(200)
+                                .message("User saved novels retrieved successfully")
+                                .data(saved)
+                                .build();
+        }
+
+        @GetMapping("/reading-progress")
+        @Operation(summary = "Get user's reading progress", description = "Retrieves the reading progress for all novels saved by the currently logged-in user.")
+        public ApiResponse<UserReadingProgressResponse> getUserReadingProgress(Principal principal) {
+                Long userId = userService.getCurrentUser(principal.getName()).getId();
+                UserReadingProgressResponse progress = novelService.getUserReadingProgress(userId);
+                return ApiResponse.<UserReadingProgressResponse>builder()
+                                .code(200)
+                                .message("User reading progress retrieved successfully")
+                                .data(progress)
+                                .build();
+        }
+
+        @PostMapping("/{id}/related/{relatedId}")
+        @Operation(summary = "Add related novel", description = "Adds a novel as related to the specified novel.")
+        public ApiResponse<Void> addRelatedNovel(
+                        @Parameter(description = "Novel ID") @PathVariable Long id,
+                        @Parameter(description = "Related Novel ID") @PathVariable Long relatedId) {
+                novelService.addRelatedNovel(id, relatedId);
+                return ApiResponse.<Void>builder()
+                                .code(200)
+                                .message("Related novel added successfully")
                                 .build();
         }
 

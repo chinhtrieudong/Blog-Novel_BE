@@ -16,8 +16,7 @@ public interface NovelRepository extends JpaRepository<Novel, Long>, JpaSpecific
     long countByStatus(NovelStatus status);
 
     @Query("SELECT n FROM Novel n WHERE " +
-            "(LOWER(n.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(n.description) LIKE LOWER(CONCAT('%', :query, '%')))")
+            "LOWER(n.title) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<Novel> searchNovels(@Param("query") String query, Pageable pageable);
 
     Page<Novel> findByAuthorId(Long authorId, Pageable pageable);
@@ -26,4 +25,7 @@ public interface NovelRepository extends JpaRepository<Novel, Long>, JpaSpecific
 
     @Query("SELECT n FROM Novel n WHERE n.author.name LIKE %:authorName%")
     Page<Novel> findByAuthorName(@Param("authorName") String authorName, Pageable pageable);
+
+    @Query("SELECT n FROM Novel n JOIN NovelLike nl ON n.id = nl.novel.id WHERE nl.user.id = :userId")
+    Page<Novel> findByUserLikes(@Param("userId") Long userId, Pageable pageable);
 }

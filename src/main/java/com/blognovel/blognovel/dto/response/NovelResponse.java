@@ -21,8 +21,16 @@ public class NovelResponse {
     private Float avgRating;
     private Set<GenreResponse> genres;
     private Integer totalChapters;
+    private Long likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long createdBy;
     private Long updatedBy;
+
+    // Reading progress fields (only populated if user has saved this novel)
+    private Boolean isSaved;
+    private Integer readChapters;
+    private Integer progressPercentage;
+    private String lastRead;
+    private Long novelSaveId;
 }

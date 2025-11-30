@@ -2,6 +2,7 @@ package com.blognovel.blognovel.model;
 
 import com.blognovel.blognovel.enums.NovelStatus;
 import jakarta.persistence.*;
+import jakarta.persistence.Lob;
 import lombok.*;
 
 import java.util.HashSet;
@@ -26,6 +27,8 @@ public class Novel extends BaseEntity {
     @Column(unique = true)
     private String slug;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String description;
 
     private String coverImage;
