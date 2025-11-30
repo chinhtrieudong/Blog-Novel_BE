@@ -21,5 +21,6 @@ public class CommentResponse {
     private Long createdBy;
     private Long updatedBy;
     private Long likeCount;
+    private Boolean isLiked;
     private List<CommentResponse> replies;
 }

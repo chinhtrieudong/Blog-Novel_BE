@@ -6,11 +6,11 @@ import com.blognovel.blognovel.dto.response.CommentResponse;
 import java.util.List;
 
 public interface CommentService {
-    List<CommentResponse> getCommentsForPost(Long postId);
+    List<CommentResponse> getCommentsForPost(Long postId, Long userId);
 
-    List<CommentResponse> getCommentsForNovel(Long novelId);
+    List<CommentResponse> getCommentsForNovel(Long novelId, Long userId);
 
-    List<CommentResponse> getCommentsForChapter(Long chapterId);
+    List<CommentResponse> getCommentsForChapter(Long chapterId, Long userId);
 
     CommentResponse addCommentToPost(Long postId, CommentRequest request, Long userId);
 
@@ -22,5 +22,5 @@ public interface CommentService {
 
     void deleteComment(Long commentId, Long userId);
 
-    void likeComment(Long commentId);
+    void likeComment(Long commentId, Long userId);
 }
