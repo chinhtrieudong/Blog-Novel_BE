@@ -27,7 +27,7 @@ import java.util.Set;
 public abstract class NovelMapper {
 
     @Mapping(target = "slug", expression = "java(generateSlug(novelRequest.getTitle()))")
-    @Mapping(target = "author.id", expression = "java(getFirstAuthorId(novelRequest.getAuthorIds()))")
+    @Mapping(target = "author", expression = "java(createAuthor(getFirstAuthorId(novelRequest.getAuthorIds())))")
     @Mapping(target = "genres", expression = "java(createGenres(novelRequest.getGenreIds()))")
     @Mapping(target = "coverImage", expression = "java(uploadImage(novelRequest.getCoverImage(), cloudinaryService))")
     public abstract Novel toEntity(NovelRequest novelRequest, @Context CloudinaryService cloudinaryService);
@@ -38,8 +38,8 @@ public abstract class NovelMapper {
     public abstract NovelResponse toResponse(Novel novel);
 
     @Mapping(target = "slug", expression = "java(generateSlug(novelRequest.getTitle()))")
-    @Mapping(target = "author.id", expression = "java(getFirstAuthorId(novelRequest.getAuthorIds()))")
-    @Mapping(target = "genres", expression = "java(createGenres(novelRequest.getGenreIds()))")
+    @Mapping(target = "author", expression = "java(createAuthor(getFirstAuthorId(novelRequest.getAuthorIds())))")
+    @Mapping(target = "genres", expression = "java(updateGenres(novel, novelRequest.getGenreIds()))")
     @Mapping(target = "coverImage", expression = "java(uploadImage(novelRequest.getCoverImage(), cloudinaryService))")
     @Mapping(target = "updatedAt", ignore = true)
     public abstract void updateNovelFromDto(NovelRequest novelRequest, @MappingTarget Novel novel,
@@ -80,6 +80,25 @@ public abstract class NovelMapper {
             }
         }
         return genres;
+    }
+
+    @Named("updateGenres")
+    protected Set<Genre> updateGenres(Novel novel, List<Long> genreIds) {
+        Set<Genre> genres = new HashSet<>();
+        if (genreIds != null) {
+            for (Long genreId : genreIds) {
+                if (genreId != null) {
+                    Genre genre = Genre.builder()
+                            .id(genreId)
+                            .build();
+                    genres.add(genre);
+                }
+            }
+        }
+        // Clear existing genres and set new ones
+        novel.getGenres().clear();
+        novel.getGenres().addAll(genres);
+        return novel.getGenres();
     }
 
     @Named("uploadImage")

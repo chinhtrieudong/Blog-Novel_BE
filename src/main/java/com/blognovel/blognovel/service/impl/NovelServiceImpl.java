@@ -1,24 +1,30 @@
 package com.blognovel.blognovel.service.impl;
 
 import com.blognovel.blognovel.dto.request.NovelRequest;
+import com.blognovel.blognovel.dto.request.ReadingProgressRequest;
 import com.blognovel.blognovel.dto.response.NovelResponse;
 import com.blognovel.blognovel.dto.response.PagedResponse;
+import com.blognovel.blognovel.dto.response.SavedNovelsResponse;
+import com.blognovel.blognovel.dto.response.UserReadingProgressResponse;
+import com.blognovel.blognovel.dto.response.ReadingProgressResponse;
 import com.blognovel.blognovel.exception.AppException;
 import com.blognovel.blognovel.exception.ErrorCode;
 import com.blognovel.blognovel.mapper.GenreMapper;
 import com.blognovel.blognovel.mapper.NovelMapper;
 import com.blognovel.blognovel.model.Author;
 import com.blognovel.blognovel.model.Novel;
-import com.blognovel.blognovel.model.NovelFavorite;
 import com.blognovel.blognovel.model.NovelLike;
 import com.blognovel.blognovel.model.NovelRating;
+import com.blognovel.blognovel.model.NovelSave;
+import com.blognovel.blognovel.model.RelatedNovel;
 import com.blognovel.blognovel.model.User;
 import com.blognovel.blognovel.repository.ChapterRepository;
 import com.blognovel.blognovel.repository.GenreRepository;
-import com.blognovel.blognovel.repository.NovelFavoriteRepository;
 import com.blognovel.blognovel.repository.NovelLikeRepository;
 import com.blognovel.blognovel.repository.NovelRatingRepository;
 import com.blognovel.blognovel.repository.NovelRepository;
+import com.blognovel.blognovel.repository.NovelSaveRepository;
+import com.blognovel.blognovel.repository.RelatedNovelRepository;
 import com.blognovel.blognovel.repository.UserRepository;
 import com.blognovel.blognovel.service.AuthorService;
 import com.blognovel.blognovel.service.CloudinaryService;
@@ -32,9 +38,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.stream.Collectors;
 
 @Service
@@ -46,8 +53,9 @@ public class NovelServiceImpl implements NovelService {
         private final GenreRepository genreRepository;
         private final ChapterRepository chapterRepository;
         private final NovelLikeRepository novelLikeRepository;
-        private final NovelFavoriteRepository novelFavoriteRepository;
         private final NovelRatingRepository novelRatingRepository;
+        private final NovelSaveRepository novelSaveRepository;
+        private final RelatedNovelRepository relatedNovelRepository;
         private final AuthorService authorService;
         private final NovelMapper novelMapper;
         private final GenreMapper genreMapper;
@@ -157,11 +165,37 @@ public class NovelServiceImpl implements NovelService {
         }
 
         @Override
-        public NovelResponse getNovelById(Long id) {
+        public NovelResponse getNovelById(Long id, Long userId) {
                 Novel novel = novelRepository.findById(id)
                                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
                 NovelResponse response = novelMapper.toResponse(novel);
                 response.setTotalChapters((int) chapterRepository.countByNovelId(id));
+                response.setLikeCount(novelLikeRepository.countByNovelId(id));
+
+                // Check if user has saved this novel and populate reading progress
+                if (userId != null) {
+                        NovelSave novelSave = novelSaveRepository.findByNovelIdAndUserId(id, userId).orElse(null);
+                        if (novelSave != null) {
+                                response.setIsSaved(true);
+                                response.setReadChapters(
+                                                novelSave.getReadChapters() != null ? novelSave.getReadChapters() : 0);
+                                response.setLastRead(novelSave.getLastRead());
+                                response.setNovelSaveId(novelSave.getId());
+
+                                // Calculate progress percentage
+                                long totalChapters = chapterRepository.countByNovelId(id);
+                                if (totalChapters > 0) {
+                                        int progressPercentage = (int) ((response.getReadChapters() * 100.0)
+                                                        / totalChapters);
+                                        response.setProgressPercentage(progressPercentage);
+                                } else {
+                                        response.setProgressPercentage(0);
+                                }
+                        } else {
+                                response.setIsSaved(false);
+                        }
+                }
+
                 return response;
         }
 
@@ -201,13 +235,6 @@ public class NovelServiceImpl implements NovelService {
         @Override
         @Transactional
         public NovelResponse createNovel(NovelRequest novelRequest, Long currentUserId) {
-                System.out.println("=== NOVEL CREATION DEBUG ===");
-                System.out.println("authorIds: " + novelRequest.getAuthorIds());
-                System.out.println("genreIds: " + novelRequest.getGenreIds());
-                System.out.println("title: " + novelRequest.getTitle());
-                System.out.println("description: " + novelRequest.getDescription());
-                System.out.println("currentUserId: " + currentUserId);
-
                 // Validate required fields
                 if (novelRequest.getTitle() == null || novelRequest.getTitle().trim().isEmpty()) {
                         throw new AppException(ErrorCode.INVALID_REQUEST);
@@ -223,24 +250,22 @@ public class NovelServiceImpl implements NovelService {
                 }
 
                 Author author = authorService.getAuthorById(novelRequest.getAuthorIds().get(0));
-                System.out.println("Found author: " + author.getName() + " (ID: " + author.getId() + ")");
 
                 Novel novel = novelMapper.toEntity(novelRequest, cloudinaryService);
                 // Set audit fields
                 novel.setCreatedBy(currentUserId);
                 novel.setUpdatedBy(currentUserId);
-                System.out.println("Novel entity created, author set to: " + novel.getAuthor().getName());
 
                 Novel savedNovel = novelRepository.save(novel);
-                System.out.println("Novel saved with ID: " + savedNovel.getId());
-                System.out.println("=== END DEBUG ===");
 
                 NovelResponse response = novelMapper.toResponse(savedNovel);
                 response.setTotalChapters(0); // New novel has no chapters yet
+                response.setLikeCount(0L);
                 return response;
         }
 
         @Override
+        @Transactional
         public NovelResponse updateNovel(Long id, NovelRequest novelRequest, Long currentUserId) {
                 Novel novel = novelRepository.findById(id)
                                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
@@ -249,7 +274,6 @@ public class NovelServiceImpl implements NovelService {
                 // Set audit field
                 novel.setUpdatedBy(currentUserId);
 
-                // Remove manual updatedAt setting - let @UpdateTimestamp handle it
                 Novel updatedNovel = novelRepository.save(novel);
                 NovelResponse response = novelMapper.toResponse(updatedNovel);
                 response.setTotalChapters((int) chapterRepository.countByNovelId(id));
@@ -283,30 +307,6 @@ public class NovelServiceImpl implements NovelService {
                                         .user(user)
                                         .build();
                         novelLikeRepository.save(like);
-                }
-        }
-
-        @Override
-        @Transactional
-        public void favoriteNovel(Long novelId, Long userId) {
-                Novel novel = novelRepository.findById(novelId)
-                                .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
-                User user = userRepository.findById(userId)
-                                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
-                // Check if user already favorited this novel
-                if (novelFavoriteRepository.existsByNovelIdAndUserId(novelId, userId)) {
-                        // Unfavorite: remove the favorite
-                        NovelFavorite favorite = novelFavoriteRepository.findByNovelIdAndUserId(novelId, userId)
-                                        .orElseThrow();
-                        novelFavoriteRepository.delete(favorite);
-                } else {
-                        // Favorite: create new favorite
-                        NovelFavorite favorite = NovelFavorite.builder()
-                                        .novel(novel)
-                                        .user(user)
-                                        .build();
-                        novelFavoriteRepository.save(favorite);
                 }
         }
 
@@ -382,6 +382,9 @@ public class NovelServiceImpl implements NovelService {
         private void setTotalChapters(List<NovelResponse> responses) {
                 for (NovelResponse response : responses) {
                         response.setTotalChapters((int) chapterRepository.countByNovelId(response.getId()));
+                        response.setLikeCount(novelLikeRepository.countByNovelId(response.getId()));
+                        // Note: Reading progress fields are not set here as these methods don't have
+                        // user context
                 }
         }
 
@@ -396,5 +399,202 @@ public class NovelServiceImpl implements NovelService {
                                 .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
                 novel.setViewCount(novel.getViewCount() + 1);
                 novelRepository.save(novel);
+        }
+
+        @Override
+        @Transactional
+        public void addRelatedNovel(Long novelId, Long relatedNovelId) {
+                Novel novel = novelRepository.findById(novelId)
+                                .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
+                Novel relatedNovel = novelRepository.findById(relatedNovelId)
+                                .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
+
+                // Validate not self-reference
+                if (novelId.equals(relatedNovelId)) {
+                        throw new AppException(ErrorCode.INVALID_REQUEST);
+                }
+
+                // Check if relation already exists
+                if (relatedNovelRepository.existsByNovelIdAndRelatedNovelId(novelId, relatedNovelId)) {
+                        throw new AppException(ErrorCode.INVALID_REQUEST);
+                }
+
+                RelatedNovel relation = RelatedNovel.builder()
+                                .novel(novel)
+                                .relatedNovel(relatedNovel)
+                                .build();
+                relatedNovelRepository.save(relation);
+        }
+
+        @Override
+        public PagedResponse<NovelResponse> getUserFavoriteNovels(Long userId, Pageable pageable) {
+                Page<Novel> novels = novelRepository.findByUserLikes(userId, pageable);
+                List<NovelResponse> novelResponses = novels.getContent().stream()
+                                .map(novelMapper::toResponse)
+                                .collect(Collectors.toList());
+                setTotalChapters(novelResponses);
+
+                return PagedResponse.<NovelResponse>builder()
+                                .content(novelResponses)
+                                .page(novels.getNumber())
+                                .size(novels.getSize())
+                                .totalElements(novels.getTotalElements())
+                                .totalPages(novels.getTotalPages())
+                                .last(novels.isLast())
+                                .build();
+        }
+
+        @Override
+        @Transactional
+        public void saveNovel(Long novelId, Long userId) {
+                Novel novel = novelRepository.findById(novelId)
+                                .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
+                User user = userRepository.findById(userId)
+                                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+                // Check if user already saved this novel
+                if (novelSaveRepository.existsByNovelIdAndUserId(novelId, userId)) {
+                        // Unsave: remove the save
+                        NovelSave save = novelSaveRepository.findByNovelIdAndUserId(novelId, userId).orElseThrow();
+                        novelSaveRepository.delete(save);
+                } else {
+                        // Save: create new save
+                        NovelSave save = NovelSave.builder()
+                                        .novel(novel)
+                                        .user(user)
+                                        .savedAt(LocalDateTime.now()
+                                                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                                        .build();
+                        novelSaveRepository.save(save);
+                }
+        }
+
+        @Override
+        public PagedResponse<NovelResponse> getSavedNovelsByUser(Long userId, Pageable pageable) {
+                Page<Novel> novels = novelSaveRepository.findSavedNovelsByUserId(userId, pageable);
+                List<NovelResponse> novelResponses = novels.getContent().stream()
+                                .map(novelMapper::toResponse)
+                                .collect(Collectors.toList());
+                setTotalChapters(novelResponses);
+
+                return PagedResponse.<NovelResponse>builder()
+                                .content(novelResponses)
+                                .page(novels.getNumber())
+                                .size(novels.getSize())
+                                .totalElements(novels.getTotalElements())
+                                .totalPages(novels.getTotalPages())
+                                .last(novels.isLast())
+                                .build();
+        }
+
+        @Override
+        public SavedNovelsResponse getSavedNovelsByUserWithStats(Long userId, Pageable pageable) {
+                // Get all saved novels for the user
+                List<NovelSave> allSaves = novelSaveRepository.findAllByUserId(userId);
+
+                // Calculate counts
+                long totalSaved = allSaves.size();
+                long completed = allSaves.stream()
+                                .filter(save -> {
+                                        long totalChapters = chapterRepository.countByNovelId(save.getNovel().getId());
+                                        return save.getReadChapters() != null
+                                                        && save.getReadChapters().intValue() >= totalChapters;
+                                })
+                                .count();
+                long reading = allSaves.stream()
+                                .filter(save -> save.getReadChapters() != null && save.getReadChapters() > 0)
+                                .count();
+                long unread = totalSaved - reading;
+
+                // Get paginated novels
+                Page<Novel> novels = novelSaveRepository.findSavedNovelsByUserId(userId, pageable);
+                List<NovelResponse> novelResponses = novels.getContent().stream()
+                                .map(novelMapper::toResponse)
+                                .collect(Collectors.toList());
+                setTotalChapters(novelResponses);
+
+                return SavedNovelsResponse.builder()
+                                .saved(totalSaved)
+                                .completed(completed)
+                                .reading(reading)
+                                .unread(unread)
+                                .novels(novelResponses)
+                                .build();
+        }
+
+        @Override
+        @Transactional
+        public void updateReadingProgress(Long novelId, Long userId, ReadingProgressRequest request) {
+                NovelSave novelSave = novelSaveRepository.findByNovelIdAndUserId(novelId, userId)
+                                .orElseThrow(() -> new AppException(ErrorCode.NOVEL_NOT_FOUND));
+
+                novelSave.setReadChapters(request.getReadChapters());
+                if (request.getLastRead() != null) {
+                        novelSave.setLastRead(request.getLastRead());
+                }
+
+                novelSaveRepository.save(novelSave);
+        }
+
+        @Override
+        public UserReadingProgressResponse getUserReadingProgress(Long userId) {
+                // Get all saved novels for the user
+                List<NovelSave> allSaves = novelSaveRepository.findAllByUserId(userId);
+
+                // Calculate counts
+                long totalSaved = allSaves.size();
+                long completed = allSaves.stream()
+                                .filter(save -> {
+                                        long totalChapters = chapterRepository.countByNovelId(save.getNovel().getId());
+                                        return save.getReadChapters() != null
+                                                        && save.getReadChapters().intValue() >= totalChapters;
+                                })
+                                .count();
+                long reading = allSaves.stream()
+                                .filter(save -> save.getReadChapters() != null && save.getReadChapters() > 0)
+                                .count();
+                long unread = totalSaved - reading;
+
+                // Build progress list
+                List<ReadingProgressResponse> progressList = allSaves.stream()
+                                .map(save -> {
+                                        Novel novel = save.getNovel();
+                                        long totalChapters = chapterRepository.countByNovelId(novel.getId());
+                                        int readChapters = save.getReadChapters() != null ? save.getReadChapters() : 0;
+                                        int progressPercentage = totalChapters > 0
+                                                        ? (int) ((readChapters * 100.0) / totalChapters)
+                                                        : 0;
+
+                                        String status;
+                                        if (readChapters == 0) {
+                                                status = "unread";
+                                        } else if (readChapters >= totalChapters) {
+                                                status = "completed";
+                                        } else {
+                                                status = "reading";
+                                        }
+
+                                        return ReadingProgressResponse.builder()
+                                                        .novelId(novel.getId())
+                                                        .novelTitle(novel.getTitle())
+                                                        .novelSlug(novel.getSlug())
+                                                        .coverImage(novel.getCoverImage())
+                                                        .totalChapters((int) totalChapters)
+                                                        .readChapters(readChapters)
+                                                        .savedAt(save.getSavedAt())
+                                                        .lastRead(save.getLastRead())
+                                                        .status(status)
+                                                        .progressPercentage(progressPercentage)
+                                                        .build();
+                                })
+                                .collect(Collectors.toList());
+
+                return UserReadingProgressResponse.builder()
+                                .totalSaved(totalSaved)
+                                .completed(completed)
+                                .reading(reading)
+                                .unread(unread)
+                                .progressList(progressList)
+                                .build();
         }
 }
