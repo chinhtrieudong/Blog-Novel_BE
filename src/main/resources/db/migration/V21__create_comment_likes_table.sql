@@ -1,5 +1,5 @@
--- Create comment_likes table
-CREATE TABLE comment_likes (
+-- Create comment_likes table if it doesn't exist
+CREATE TABLE IF NOT EXISTS comment_likes (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     comment_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
