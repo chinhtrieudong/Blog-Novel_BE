@@ -46,4 +46,8 @@ public class Comment extends BaseEntity {
 
     @Builder.Default
     private Long likeCount = 0L;
+
+    @Builder.Default
+    @Column(name = "is_blocked")
+    private Boolean isBlocked = false;
 }
