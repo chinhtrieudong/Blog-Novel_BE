@@ -22,7 +22,6 @@ public class CommentResponse {
     private Long updatedBy;
     private Long likeCount;
     private Boolean isLiked;
-    private Boolean isBlocked;
     private Long parentId;
     private List<CommentResponse> replies;
 }

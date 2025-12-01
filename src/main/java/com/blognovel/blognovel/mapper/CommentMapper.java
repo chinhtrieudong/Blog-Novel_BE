@@ -16,7 +16,6 @@ public interface CommentMapper {
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "likeCount", source = "likeCount")
-    @Mapping(target = "isBlocked", expression = "java(comment.getIsBlocked())")
     @Mapping(target = "parentId", expression = "java(comment.getParent() != null ? comment.getParent().getId() : null)")
     CommentResponse toResponse(Comment comment);
 
