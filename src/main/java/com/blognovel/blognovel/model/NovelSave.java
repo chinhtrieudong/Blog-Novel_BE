@@ -24,9 +24,12 @@ public class NovelSave extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "read_chapters")
     private Integer readChapters;
 
+    @Column(name = "saved_at")
     private String savedAt;
 
+    @Column(name = "last_read")
     private String lastRead;
 }
