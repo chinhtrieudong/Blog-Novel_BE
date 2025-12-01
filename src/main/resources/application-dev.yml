@@ -25,6 +25,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     repair: true
+    validate-on-migrate: false
   # Redis disabled in dev for now
   # data:
   #   redis:
