@@ -12,11 +12,11 @@ import java.util.List;
 public interface CommentMapper {
 
     @Mapping(target = "user", source = "user")
-    @Mapping(target = "replies", source = "replies")
+    @Mapping(target = "replies", expression = "java(new java.util.ArrayList<>())") // Empty list to avoid loops
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "likeCount", source = "likeCount")
-    @Mapping(target = "isBlocked", source = "isBlocked")
+    @Mapping(target = "isBlocked", expression = "java(comment.getIsBlocked())")
     @Mapping(target = "parentId", expression = "java(comment.getParent() != null ? comment.getParent().getId() : null)")
     CommentResponse toResponse(Comment comment);
 

@@ -13,13 +13,14 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpecificationExecutor<Comment> {
 
-    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.replies WHERE c.post.id = :postId AND c.parent IS NULL ORDER BY c.createdAt ASC")
+    // Remove LEFT JOIN FETCH to avoid nested reply loops
+    @Query("SELECT c FROM Comment c WHERE c.post.id = :postId AND c.parent IS NULL ORDER BY c.createdAt ASC")
     List<Comment> findByPostIdAndParentIsNullOrderByCreatedAtAsc(Long postId);
 
-    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.replies WHERE c.novel.id = :novelId AND c.parent IS NULL ORDER BY c.createdAt ASC")
+    @Query("SELECT c FROM Comment c WHERE c.novel.id = :novelId AND c.parent IS NULL ORDER BY c.createdAt ASC")
     List<Comment> findByNovelIdAndParentIsNullOrderByCreatedAtAsc(Long novelId);
 
-    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.replies WHERE c.chapter.id = :chapterId AND c.parent IS NULL ORDER BY c.createdAt ASC")
+    @Query("SELECT c FROM Comment c WHERE c.chapter.id = :chapterId AND c.parent IS NULL ORDER BY c.createdAt ASC")
     List<Comment> findByChapterIdAndParentIsNullOrderByCreatedAtAsc(Long chapterId);
 
     @Modifying
