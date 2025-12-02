@@ -25,6 +25,8 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+    repair: true
+    validate-on-migrate: false
     url: jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:blog_novel_db}?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
     user: ${MYSQLUSER:bloguser}
     password: ${MYSQLPASSWORD:blogpass}
