@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -29,7 +28,7 @@ public class CommentController {
         @Operation(summary = "Get comments for a post", description = "Retrieves all top-level comments for a specific post.")
         public ApiResponse<List<CommentResponse>> getCommentsForPost(
                         @Parameter(description = "Post ID") @PathVariable Long postId,
-                        @AuthenticationPrincipal Principal principal) {
+                        Principal principal) {
                 Long userId = principal != null ? userService.getCurrentUser(principal.getName()).getId() : null;
                 List<CommentResponse> comments = commentService.getCommentsForPost(postId, userId);
                 return ApiResponse.<List<CommentResponse>>builder()
@@ -44,7 +43,7 @@ public class CommentController {
         public ApiResponse<CommentResponse> addCommentToPost(
                         @Parameter(description = "Post ID") @PathVariable Long postId,
                         @Valid @RequestBody CommentRequest request,
-                        @AuthenticationPrincipal Principal principal) {
+                        Principal principal) {
                 Long userId = userService.getCurrentUser(principal.getName()).getId();
                 CommentResponse comment = commentService.addCommentToPost(postId, request, userId);
                 return ApiResponse.<CommentResponse>builder()
@@ -58,7 +57,7 @@ public class CommentController {
         @Operation(summary = "Get comments for a novel", description = "Retrieves all top-level comments for a specific novel.")
         public ApiResponse<List<CommentResponse>> getCommentsForNovel(
                         @Parameter(description = "Novel ID") @PathVariable Long novelId,
-                        @AuthenticationPrincipal Principal principal) {
+                        Principal principal) {
                 Long userId = principal != null ? userService.getCurrentUser(principal.getName()).getId() : null;
                 List<CommentResponse> comments = commentService.getCommentsForNovel(novelId, userId);
                 return ApiResponse.<List<CommentResponse>>builder()

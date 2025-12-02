@@ -39,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
 
         @Override
         public List<CommentResponse> getCommentsForPost(Long postId, Long userId) {
-                List<Comment> comments = commentRepository.findByPostIdAndParentIsNullOrderByCreatedAtAsc(postId);
+                List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
                 List<CommentResponse> responses = commentMapper.toResponseList(comments);
                 setLikeStatuses(responses, userId);
                 return responses;
@@ -47,7 +47,7 @@ public class CommentServiceImpl implements CommentService {
 
         @Override
         public List<CommentResponse> getCommentsForNovel(Long novelId, Long userId) {
-                List<Comment> comments = commentRepository.findByNovelIdAndParentIsNullOrderByCreatedAtAsc(novelId);
+                List<Comment> comments = commentRepository.findByNovelIdOrderByCreatedAtAsc(novelId);
                 List<CommentResponse> responses = commentMapper.toResponseList(comments);
                 setLikeStatuses(responses, userId);
                 return responses;
@@ -66,6 +66,10 @@ public class CommentServiceImpl implements CommentService {
                                 .user(user)
                                 .post(post)
                                 .build();
+
+                // Set audit fields
+                comment.setCreatedBy(userId);
+                comment.setUpdatedBy(userId);
 
                 if (request.getParentId() != null) {
                         Comment parent = commentRepository.findById(request.getParentId())
@@ -91,6 +95,10 @@ public class CommentServiceImpl implements CommentService {
                                 .novel(novel)
                                 .build();
 
+                // Set audit fields
+                comment.setCreatedBy(userId);
+                comment.setUpdatedBy(userId);
+
                 if (request.getParentId() != null) {
                         Comment parent = commentRepository.findById(request.getParentId())
                                         .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
@@ -103,7 +111,7 @@ public class CommentServiceImpl implements CommentService {
 
         @Override
         public List<CommentResponse> getCommentsForChapter(Long chapterId, Long userId) {
-                List<Comment> comments = commentRepository.findByChapterIdAndParentIsNullOrderByCreatedAtAsc(chapterId);
+                List<Comment> comments = commentRepository.findByChapterIdOrderByCreatedAtAsc(chapterId);
                 List<CommentResponse> responses = commentMapper.toResponseList(comments);
                 setLikeStatuses(responses, userId);
                 return responses;
@@ -122,6 +130,10 @@ public class CommentServiceImpl implements CommentService {
                                 .user(user)
                                 .chapter(chapter)
                                 .build();
+
+                // Set audit fields
+                comment.setCreatedBy(userId);
+                comment.setUpdatedBy(userId);
 
                 if (request.getParentId() != null) {
                         Comment parent = commentRepository.findById(request.getParentId())
@@ -144,6 +156,7 @@ public class CommentServiceImpl implements CommentService {
                 }
 
                 comment.setContent(request.getContent());
+                comment.setUpdatedBy(userId);
                 Comment updated = commentRepository.save(comment);
                 return commentMapper.toResponse(updated);
         }
@@ -188,6 +201,7 @@ public class CommentServiceImpl implements CommentService {
                         comment.setLikeCount(comment.getLikeCount() + 1);
                 }
 
+                comment.setUpdatedBy(userId);
                 commentRepository.save(comment);
         }
 

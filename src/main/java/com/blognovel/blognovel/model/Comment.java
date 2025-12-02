@@ -3,6 +3,7 @@ package com.blognovel.blognovel.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -41,8 +42,9 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
+    @Builder.Default
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<Comment> replies;
+    private List<Comment> replies = new ArrayList<>();
 
     @Builder.Default
     private Long likeCount = 0L;
